@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon"
+    "start": "nodemon",
+    "build": "tsc --build tsconfig.json",
+    "serve": "node ./dist/index.js"
   },
   "author": "simonostini",
   "license": "ISC",

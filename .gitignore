@@ -77,3 +77,4 @@ typings/
 
 # custom
 *.rest
+dist/
