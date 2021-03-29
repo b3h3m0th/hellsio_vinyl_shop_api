@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 
 const authenticateAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.body.pw) return res.sendStatus(403);
-  const authHeader = req.headers["authorization"];
+  const password = req.headers["authorization"];
+
+  if (!password || !bcrypt.compareSync(process.env.ADMIN_PASSWORD, password))
+    return res.sendStatus(401);
+  next();
 };
 
 export default authenticateAdmin;
