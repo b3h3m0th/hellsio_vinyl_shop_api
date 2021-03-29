@@ -2,13 +2,14 @@ import * as express from "express";
 import { Request, Response } from "express";
 const router = express.Router();
 import * as jwt from "jsonwebtoken";
+import authenticateUserToken from "../authorization/user";
 
 router.get("/", async (req: Request, res: Response) => {
-  res.json({ endpoint: "user" });
+  return res.json({ endpoint: "user" });
 });
 
 router.post("/register", async (req: Request, res: Response) => {
-  res.json({ endpoint: "user/register" });
+  return res.json({ endpoint: "user/register" });
 });
 
 router.post("/login", async (req: Request, res: Response) => {
@@ -16,7 +17,15 @@ router.post("/login", async (req: Request, res: Response) => {
   const user = { username: "Simon" };
 
   const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-  res.json({ accessToken: accessToken });
+  return res.json({ accessToken: accessToken });
 });
+
+router.post(
+  "/checkout",
+  authenticateUserToken,
+  async (req: Request, res: Response) => {
+    return res.send("checkout");
+  }
+);
 
 export default router;

@@ -7,7 +7,7 @@ import { Request, Response } from "express";
 const app = express();
 import database from "./database";
 
-import authRoute from "./routes/auth";
+import authRoute from "./routes/user";
 import mainRoute from "./routes/main";
 
 // database.connection = database.connect({
