@@ -11,6 +11,8 @@ router.post("/register", async (req: Request, res: Response) => {
 });
 
 router.post("/login", async (req: Request, res: Response) => {
+  //authenticate user with database
+
   res.json({ endpoint: "user/login" });
 });
 
