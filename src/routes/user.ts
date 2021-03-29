@@ -43,6 +43,11 @@ router.post("/token", async (req: Request, res: Response) => {
   );
 });
 
+router.delete("/logout", async (req: Request, res: Response) => {
+  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  return res.sendStatus(204);
+});
+
 router.post(
   "/checkout",
   authenticateUserToken,
