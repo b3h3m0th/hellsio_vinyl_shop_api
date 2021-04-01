@@ -20,7 +20,7 @@ import productRoute from "./routes/product";
 //   database: process.env.DATABASE_DATABASE,
 // });
 
-app.use(cors());
+app.use(cors("*"));
 app.use(express.json());
 
 const base = "api";
@@ -35,4 +35,6 @@ app.get("/", (req: Request, res: Response) => {
   res.redirect(`/${base}`);
 });
 
-app.listen(process.env.PORT, () => console.log(`Hellsio API online!`));
+app.listen(process.env.PORT, () =>
+  console.log(`Hellsio API online on Port ${process.env.PORT}!`)
+);
