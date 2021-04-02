@@ -3,11 +3,12 @@ import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import generateAccessToken from "../authorization/token";
 import * as bcrypt from "bcrypt";
+import authenticateAdmin from "../authorization/admin";
 const router = express.Router();
 
 let refreshTokens = [];
 
-router.get("/", (req: Request, res: Response) => {
+router.get("/", authenticateAdmin, (req: Request, res: Response) => {
   return res.send("Welcome to Hellsio vinyl shop admin endpoint");
 });
 
@@ -22,7 +23,7 @@ router.post("/token", async (req: Request, res: Response) => {
     (err: jwt.JsonWebTokenError, user: any) => {
       if (err) return res.sendStatus(403);
 
-      const accessToken = generateAccessToken({ name: user.name });
+      const accessToken = generateAccessToken({ username: user.username });
       return res.json({ accessToken: accessToken });
     }
   );
@@ -38,7 +39,7 @@ router.post("/login", async (req: Request, res: Response) => {
     )
   )
     return res.sendStatus(403);
-  const user = { username: "Simon" };
+  const user = { username: "admin" };
 
   const accessToken = generateAccessToken(user);
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
