@@ -6,6 +6,7 @@ import * as bcrypt from "bcrypt";
 import authenticateAdmin from "../authorization/admin";
 const router = express.Router();
 
+//do this in database!
 let refreshTokens = [];
 
 router.get("/", authenticateAdmin, (req: Request, res: Response) => {
@@ -14,7 +15,7 @@ router.get("/", authenticateAdmin, (req: Request, res: Response) => {
 
 router.post("/token", async (req: Request, res: Response) => {
   const refreshToken = req.body.token;
-  if (!refreshTokens) return res.sendStatus(401);
+  if (!refreshToken) return res.sendStatus(401);
   if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
 
   jwt.verify(
@@ -39,7 +40,8 @@ router.post("/login", async (req: Request, res: Response) => {
     )
   )
     return res.sendStatus(403);
-  const user = { username: "admin" };
+
+  const user = { username: req.body.username };
 
   const accessToken = generateAccessToken(user);
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
