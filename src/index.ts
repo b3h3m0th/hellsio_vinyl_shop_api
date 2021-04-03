@@ -6,19 +6,12 @@ import * as express from "express";
 import { Request, Response } from "express";
 import * as cors from "cors";
 const app = express();
-import database from "./database";
+import db from "./database";
 
 import authRoute from "./routes/user";
 import mainRoute from "./routes/main";
 import adminRoute from "./routes/admin";
 import productRoute from "./routes/product";
-
-// database.connection = database.connect({
-//   host: process.env.DATABASE_HOST,
-//   user: process.env.DATABASE_USER,
-//   password: process.env.DATABASE_PASSWORD,
-//   database: process.env.DATABASE_DATABASE,
-// });
 
 app.use(cors("*"));
 app.use(express.json());

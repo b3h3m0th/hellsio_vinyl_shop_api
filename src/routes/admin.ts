@@ -52,4 +52,28 @@ router.delete("/logout", async (req: Request, res: Response) => {
   return res.sendStatus(204);
 });
 
+router.get(
+  "/orders",
+  authenticateAdmin,
+  async (req: Request, res: Response) => {
+    return res.json({ endpoint: "orders" });
+  }
+);
+
+router.get(
+  "/products",
+  authenticateAdmin,
+  async (req: Request, res: Response) => {
+    return res.json({ endpoint: "products" });
+  }
+);
+
+router.get(
+  "/customers",
+  authenticateAdmin,
+  async (req: Request, res: Response) => {
+    return res.json({ endpoint: "customers" });
+  }
+);
+
 export default router;
