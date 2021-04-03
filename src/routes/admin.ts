@@ -3,13 +3,13 @@ import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import generateAccessToken from "../authorization/token";
 import * as bcrypt from "bcrypt";
-import authenticateAdmin from "../authorization/admin";
+import authenticateAdminToken from "../authorization/admin";
 const router = express.Router();
 
 //do this in database!
 let refreshTokens = [];
 
-router.get("/", authenticateAdmin, (req: Request, res: Response) => {
+router.get("/", authenticateAdminToken, (req: Request, res: Response) => {
   return res.send("Welcome to Hellsio vinyl shop admin endpoint");
 });
 
@@ -56,7 +56,7 @@ router.delete("/logout", async (req: Request, res: Response) => {
 
 router.get(
   "/orders",
-  authenticateAdmin,
+  authenticateAdminToken,
   async (req: Request, res: Response) => {
     return res.json({ endpoint: "orders" });
   }
@@ -64,7 +64,7 @@ router.get(
 
 router.get(
   "/products",
-  authenticateAdmin,
+  authenticateAdminToken,
   async (req: Request, res: Response) => {
     return res.json({ endpoint: "products" });
   }
@@ -72,7 +72,7 @@ router.get(
 
 router.get(
   "/customers",
-  authenticateAdmin,
+  authenticateAdminToken,
   async (req: Request, res: Response) => {
     return res.json({ endpoint: "customers" });
   }

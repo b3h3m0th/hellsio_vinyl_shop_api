@@ -28,7 +28,7 @@ router.post("/login", async (req: Request, res: Response) => {
   )
     return res.sendStatus(403);
 
-  const user = { username: req.body.username };
+  const user = { email: req.body.email };
 
   const accessToken = generateAccessToken(user);
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
@@ -47,7 +47,7 @@ router.post("/token", async (req: Request, res: Response) => {
     (err: jwt.JsonWebTokenError, user: any) => {
       if (err) return res.sendStatus(403);
 
-      const accessToken = generateAccessToken({ name: user.username });
+      const accessToken = generateAccessToken({ email: user.email });
       return res.json({ accessToken: accessToken });
     }
   );

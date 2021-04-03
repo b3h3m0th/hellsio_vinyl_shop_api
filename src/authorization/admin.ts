@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 
-const authenticateAdmin = (req: any, res: Response, next: NextFunction) => {
+const authenticateAdminToken = (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -19,4 +23,4 @@ const authenticateAdmin = (req: any, res: Response, next: NextFunction) => {
   );
 };
 
-export default authenticateAdmin;
+export default authenticateAdminToken;
