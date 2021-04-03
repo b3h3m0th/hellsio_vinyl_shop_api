@@ -5,6 +5,7 @@ dotenv.config();
 import * as express from "express";
 import { Request, Response } from "express";
 import * as cors from "cors";
+import * as morgan from "morgan";
 const app = express();
 import db from "./database";
 
@@ -14,6 +15,7 @@ import adminRoute from "./routes/admin";
 import productRoute from "./routes/product";
 
 app.use(cors("*"));
+app.use(morgan("dev"));
 app.use(express.json());
 
 const base = "api";
