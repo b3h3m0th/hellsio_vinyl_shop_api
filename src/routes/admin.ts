@@ -7,7 +7,7 @@ import authenticateAdminToken from "../authorization/admin";
 const router = express.Router();
 
 //do this in database!
-let refreshTokens = [];
+let refreshTokens: Array<any> = [];
 
 router.get("/", authenticateAdminToken, (req: Request, res: Response) => {
   return res.send("Welcome to Hellsio vinyl shop admin endpoint");

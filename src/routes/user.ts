@@ -7,7 +7,7 @@ import generateAccessToken from "../authorization/token";
 import authenticateUserToken from "../authorization/user";
 
 //do this in database!
-let refreshTokens = [];
+let refreshTokens: Array<any> = [];
 
 router.get("/", authenticateUserToken, async (req: Request, res: Response) => {
   return res.json({ endpoint: "user" });
