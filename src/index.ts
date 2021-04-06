@@ -18,7 +18,7 @@ app.use(cors("*"));
 app.use(morgan("dev"));
 app.use(express.json());
 
-const base = "api";
+const base = "api" as const;
 
 //routes
 app.use(`/${base}`, mainRoute);

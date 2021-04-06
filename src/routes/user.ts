@@ -5,6 +5,7 @@ import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import generateAccessToken from "../authorization/token";
 import authenticateUserToken from "../authorization/user";
+import db from "../database";
 
 //do this in database!
 let refreshTokens: Array<any> = [];
@@ -14,6 +15,14 @@ router.get("/", authenticateUserToken, async (req: Request, res: Response) => {
 });
 
 router.post("/register", async (req: Request, res: Response) => {
+  db.query(
+    `INSERT INTO user (user_id, firstname, lastname, username, email, phone, password, birthdate, street, street_number, Role_role_id, Location_location_id) VALUES (NULL, NULL, NULL, '${req.body.username}', '${req.body.email}', NULL, '${req.body.password}', NULL, NULL, NULL, '2', '1');`,
+    null,
+    (err, results, fields) => {
+      if (err) res.sendStatus(406);
+      console.log(err, results, fields);
+    }
+  );
   return res.json({ endpoint: "user/register" });
 });
 

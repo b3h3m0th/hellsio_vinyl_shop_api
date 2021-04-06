@@ -5,6 +5,7 @@ import mysql, {
   Query,
   queryCallback,
   QueryOptions,
+  createPool,
 } from "mysql";
 
 export type DatabaseConnection = {
@@ -16,13 +17,13 @@ export type DatabaseConnection = {
 
 export type DB = {
   query: (
-    query: mysql.Query,
+    query: string,
     params: QueryOptions,
     callback: mysql.queryCallback
   ) => void;
 };
 
-const pool: Pool = mysql.createPool({
+const pool: Pool = createPool({
   connectionLimit: 10,
   host: process.env.DATABASE_HOST,
   user: process.env.DATABASE_USER,
@@ -32,7 +33,7 @@ const pool: Pool = mysql.createPool({
 
 const db: DB = (() => {
   const _query = (
-    query: Query,
+    query: string,
     params: QueryOptions,
     callback: queryCallback
   ) => {
