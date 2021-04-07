@@ -40,22 +40,22 @@ const db: DB = (() => {
     pool.getConnection((err: MysqlError, connection: PoolConnection) => {
       if (err) {
         connection.release();
-        callback(null, err);
+        callback(err);
         throw err;
       }
 
-      connection.query(query, params, (err: MysqlError, rows) => {
+      connection.query(query, params, (err: MysqlError, results, fields) => {
         connection.release();
         if (!err) {
-          callback(rows);
+          callback(err, results, fields);
         } else {
-          callback(null, err);
+          callback(err);
         }
       });
 
       connection.on("error", (err: MysqlError) => {
         connection.release();
-        callback(null, err);
+        callback(err);
         throw err;
       });
     });
