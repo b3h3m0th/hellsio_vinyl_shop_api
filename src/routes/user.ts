@@ -19,13 +19,10 @@ router.post("/register", async (req: Request, res: Response) => {
   if (req.body.username.includes("@"))
     return res.status(406).json({ error: "Your username mustn't include '@'" });
 
+  const hashedPassword: string = bcrypt.hashSync(req.body.password, 10);
+
   db.query(
-    `INSERT INTO user (user_id, firstname, lastname, username, email, phone, password, birthdate, street, street_number, Role_role_id, Location_location_id) VALUES (NULL, NULL, NULL, '${
-      req.body.username
-    }', '${req.body.email}', NULL, '${bcrypt.hashSync(
-      req.body.password,
-      bcrypt.genSaltSync(10)
-    )}', NULL, NULL, NULL, '2', '1');`,
+    `INSERT INTO user (user_id, firstname, lastname, username, email, phone, password, birthdate, street, street_number, Role_role_id, Location_location_id) VALUES (NULL, NULL, NULL, '${req.body.username}', '${req.body.email}', NULL, '${hashedPassword}', NULL, NULL, NULL, '2', '1');`,
     null,
     (err: MysqlError, results, fields) => {
       if (err && err.code === "ER_DUP_ENTRY") {
@@ -61,6 +58,11 @@ router.post("/login", async (req: Request, res: Response) => {
           return res.status(406).json({ error: "Wrong email or password" });
         }
 
+        console.log(incommingUser.password, results[0].password);
+        console.log(
+          bcrypt.compareSync(incommingUser.password, results[0].password)
+        );
+
         if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
           return res
             .status(406)
@@ -93,6 +95,11 @@ router.post("/login", async (req: Request, res: Response) => {
         else if (!results) {
           return res.status(406).json({ error: "Wrong username or password" });
         }
+
+        console.log(incommingUser.password, results[0].password);
+        console.log(
+          bcrypt.compareSync(incommingUser.password, results[0].password)
+        );
 
         if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
           return res
