@@ -44,6 +44,8 @@ router.post("/login", async (req: Request, res: Response) => {
     password: req.body.password,
   };
 
+  let outcommingUser = undefined;
+
   //separate username/email
   if (incommingUser.email.includes("@")) {
     db.query(
@@ -68,6 +70,7 @@ router.post("/login", async (req: Request, res: Response) => {
             .status(406)
             .json({ error: "Wrong email/username or password" });
         } else {
+          outcommingUser = results;
           const userToSign = { email: req.body.email };
 
           const accessToken = generateAccessToken(userToSign);
@@ -106,6 +109,7 @@ router.post("/login", async (req: Request, res: Response) => {
             .status(406)
             .json({ error: "Wrong email/username or password" });
         } else {
+          outcommingUser = results;
           const userToSign = { email: req.body.email };
 
           const accessToken = generateAccessToken(userToSign);
