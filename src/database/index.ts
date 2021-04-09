@@ -16,7 +16,7 @@ export type DatabaseConnection = {
 };
 
 export type DB = {
-  query: (query: string, params: any, callback: mysql.queryCallback) => void;
+  query: (query: string, params: any, callback: mysql.queryCallback) => any;
 };
 
 const pool: Pool = createPool({

@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import generateAccessToken from "../authorization/token";
+import { generateAccessToken } from "../authorization/token";
 import * as bcrypt from "bcrypt";
 import authenticateAdminToken from "../authorization/admin";
 const router = express.Router();

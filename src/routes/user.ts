@@ -3,13 +3,15 @@ import { Request, Response } from "express";
 const router = express.Router();
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
-import generateAccessToken from "../authorization/token";
+import { generateAccessToken } from "../authorization/token";
 import authenticateUserToken from "../authorization/user";
 import db from "../database";
 import { MysqlError } from "mysql";
+import { RefreshTokens } from "../authorization/token";
 
 //do this in database!
 let refreshTokens: Array<any> = [];
+//update DONE :DD
 
 router.get("/", authenticateUserToken, async (req: Request, res: Response) => {
   return res.json({ endpoint: "user" });
@@ -49,21 +51,16 @@ router.post("/login", async (req: Request, res: Response) => {
   //separate username/email
   if (incommingUser.email.includes("@")) {
     db.query(
-      `SELECT password FROM user WHERE email = ?`,
+      `SELECT user_id, password FROM user WHERE email = ?`,
       [incommingUser.email],
       (err: MysqlError, results) => {
         if (err)
           return res
             .status(406)
             .json({ error: "An error occured while registering you" });
-        else if (!results) {
+        else if (results.length === 0) {
           return res.status(406).json({ error: "Wrong email or password" });
         }
-
-        console.log(incommingUser.password, results[0].password);
-        console.log(
-          bcrypt.compareSync(incommingUser.password, results[0].password)
-        );
 
         if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
           return res
@@ -78,7 +75,9 @@ router.post("/login", async (req: Request, res: Response) => {
             userToSign,
             process.env.REFRESH_TOKEN_SECRET
           );
-          refreshTokens.push(refreshToken);
+
+          RefreshTokens.add(refreshToken, results[0].user_id);
+
           return res.json({
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -88,21 +87,16 @@ router.post("/login", async (req: Request, res: Response) => {
     );
   } else {
     db.query(
-      `SELECT password FROM user WHERE username = ?`,
+      `SELECT user_id, password FROM user WHERE username = ?`,
       [incommingUser.email],
       (err: MysqlError, results) => {
         if (err)
           return res
             .status(406)
             .json({ error: "An error occured while registering you" });
-        else if (!results) {
+        else if (results.length === 0) {
           return res.status(406).json({ error: "Wrong username or password" });
         }
-
-        console.log(incommingUser.password, results[0].password);
-        console.log(
-          bcrypt.compareSync(incommingUser.password, results[0].password)
-        );
 
         if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
           return res
@@ -117,7 +111,9 @@ router.post("/login", async (req: Request, res: Response) => {
             userToSign,
             process.env.REFRESH_TOKEN_SECRET
           );
-          refreshTokens.push(refreshToken);
+
+          RefreshTokens.add(refreshToken, results[0].user_id);
+
           return res.json({
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -131,7 +127,7 @@ router.post("/login", async (req: Request, res: Response) => {
 router.post("/token", async (req: Request, res: Response) => {
   const refreshToken = req.body.token;
   if (!refreshToken) return res.sendStatus(401);
-  if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+  if (!RefreshTokens.includes(refreshToken)) return res.sendStatus(403);
 
   jwt.verify(
     refreshToken,
@@ -146,7 +142,7 @@ router.post("/token", async (req: Request, res: Response) => {
 });
 
 router.delete("/logout", async (req: Request, res: Response) => {
-  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  RefreshTokens.remove(req.headers["token"].toString());
   return res.sendStatus(204);
 });
 
