@@ -6,6 +6,7 @@ import * as bcrypt from "bcrypt";
 import generateAccessToken from "../authorization/token";
 import authenticateUserToken from "../authorization/user";
 import db from "../database";
+import { MysqlError } from "mysql";
 
 //do this in database!
 let refreshTokens: Array<any> = [];
@@ -15,6 +16,9 @@ router.get("/", authenticateUserToken, async (req: Request, res: Response) => {
 });
 
 router.post("/register", async (req: Request, res: Response) => {
+  if (req.body.username.includes("@"))
+    return res.status(406).json({ error: "Your username mustn't include '@'" });
+
   db.query(
     `INSERT INTO user (user_id, firstname, lastname, username, email, phone, password, birthdate, street, street_number, Role_role_id, Location_location_id) VALUES (NULL, NULL, NULL, '${
       req.body.username
@@ -23,7 +27,7 @@ router.post("/register", async (req: Request, res: Response) => {
       bcrypt.genSaltSync(10)
     )}', NULL, NULL, NULL, '2', '1');`,
     null,
-    (err, results, fields) => {
+    (err: MysqlError, results, fields) => {
       if (err && err.code === "ER_DUP_ENTRY") {
         return res
           .status(406)
@@ -31,69 +35,86 @@ router.post("/register", async (req: Request, res: Response) => {
       } else if (err) {
         return res
           .status(406)
-          .json({ error: "An error occured while logging you in" });
+          .json({ error: "An error occured while registering you" });
       }
     }
   );
 });
 
 router.post("/login", async (req: Request, res: Response) => {
-  let userHash: string;
-  let userInDB: any = null;
+  const incommingUser: { email: string; password: string } = {
+    email: req.body.email,
+    password: req.body.password,
+  };
 
-  db.query(
-    `SELECT password from user WHERE ${
-      req.body.email.includes("@")
-        ? `email="${req.body.email}"`
-        : `username="${req.body.email}"`
-    };`,
-    null,
-    (err, results, fields) => {
-      console.log("error: ", err);
-      console.log("results: ", results);
-      console.log("fields: ", fields);
-      userHash = results.RowDataPacket.password;
-      if (err) {
-        return res
-          .status(406)
-          .json({ error: "Sorry, an error occured when logging you in" });
+  //separate username/email
+  if (incommingUser.email.includes("@")) {
+    db.query(
+      `SELECT password FROM user WHERE email = ?`,
+      [incommingUser.email],
+      (err: MysqlError, results) => {
+        if (err)
+          return res
+            .status(406)
+            .json({ error: "An error occured while registering you" });
+        else if (!results) {
+          return res.status(406).json({ error: "Wrong email or password" });
+        }
+
+        if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
+          return res
+            .status(406)
+            .json({ error: "Wrong email/username or password" });
+        } else {
+          const userToSign = { email: req.body.email };
+
+          const accessToken = generateAccessToken(userToSign);
+          const refreshToken = jwt.sign(
+            userToSign,
+            process.env.REFRESH_TOKEN_SECRET
+          );
+          refreshTokens.push(refreshToken);
+          return res.json({
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+          });
+        }
       }
-    }
-  );
+    );
+  } else {
+    db.query(
+      `SELECT password FROM user WHERE username = ?`,
+      [incommingUser.email],
+      (err: MysqlError, results) => {
+        if (err)
+          return res
+            .status(406)
+            .json({ error: "An error occured while registering you" });
+        else if (!results) {
+          return res.status(406).json({ error: "Wrong username or password" });
+        }
 
-  console.log("userHash: ", userHash);
+        if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
+          return res
+            .status(406)
+            .json({ error: "Wrong email/username or password" });
+        } else {
+          const userToSign = { email: req.body.email };
 
-  db.query(
-    `SELECT * from user WHERE ${
-      req.body.email.includes("@")
-        ? `email="${req.body.email}"`
-        : `username="${req.body.email}"`
-    } && password="${bcrypt.compareSync(req.body.password, userHash)}";`,
-    null,
-    (err, results, fields) => {
-      console.log(results);
-      if (err || !fields) {
-        return res.status(406).json({ error: "Wrong username or password" });
+          const accessToken = generateAccessToken(userToSign);
+          const refreshToken = jwt.sign(
+            userToSign,
+            process.env.REFRESH_TOKEN_SECRET
+          );
+          refreshTokens.push(refreshToken);
+          return res.json({
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+          });
+        }
       }
-    }
-  );
-
-  //authenticate user with database
-  // if (
-  //   req.body.email !== "simonostini@gmail.com" ||
-  //   !bcrypt.compareSync(
-  //     req.body.password,
-  //     bcrypt.hashSync(process.env.SIMON_USER_PASSWORD, 10)
-  //   )
-  // )
-  //   return res.sendStatus(403);
-
-  const user = { email: req.body.email };
-
-  const accessToken = generateAccessToken(user);
-  const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-  refreshTokens.push(refreshToken);
-  return res.json({ accessToken: accessToken, refreshToken: refreshToken });
+    );
+  }
 });
 
 router.post("/token", async (req: Request, res: Response) => {

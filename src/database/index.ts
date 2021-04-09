@@ -16,11 +16,7 @@ export type DatabaseConnection = {
 };
 
 export type DB = {
-  query: (
-    query: string,
-    params: QueryOptions,
-    callback: mysql.queryCallback
-  ) => void;
+  query: (query: string, params: any, callback: mysql.queryCallback) => void;
 };
 
 const pool: Pool = createPool({
@@ -32,11 +28,7 @@ const pool: Pool = createPool({
 });
 
 const db: DB = (() => {
-  const _query = (
-    query: string,
-    params: QueryOptions,
-    callback: queryCallback
-  ) => {
+  const _query = (query: string, params: any, callback: queryCallback) => {
     pool.getConnection((err: MysqlError, connection: PoolConnection) => {
       if (err) {
         connection.release();
