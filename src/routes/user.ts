@@ -9,10 +9,6 @@ import db from "../database";
 import { MysqlError } from "mysql";
 import { RefreshTokens } from "../authorization/token";
 
-//do this in database!
-let refreshTokens: Array<any> = [];
-//update DONE :DD
-
 router.get("/", authenticateUserToken, async (req: Request, res: Response) => {
   return res.json({ endpoint: "user" });
 });
