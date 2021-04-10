@@ -7,7 +7,6 @@ import { Request, Response } from "express";
 import * as cors from "cors";
 import * as morgan from "morgan";
 const app = express();
-import db from "./database";
 
 import authRoute from "./routes/user";
 import mainRoute from "./routes/main";

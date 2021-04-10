@@ -32,6 +32,8 @@ router.post("/register", async (req: Request, res: Response) => {
           .status(406)
           .json({ error: "An error occured while registering you" });
       }
+
+      return res.sendStatus(204);
     }
   );
 });
@@ -41,8 +43,6 @@ router.post("/login", async (req: Request, res: Response) => {
     email: req.body.email,
     password: req.body.password,
   };
-
-  let outcommingUser = undefined;
 
   //separate username/email
   if (incommingUser.email.includes("@")) {
@@ -63,7 +63,6 @@ router.post("/login", async (req: Request, res: Response) => {
             .status(406)
             .json({ error: "Wrong email/username or password" });
         } else {
-          outcommingUser = results;
           const userToSign = { email: req.body.email };
 
           const accessToken = generateAccessToken(userToSign);
@@ -99,7 +98,6 @@ router.post("/login", async (req: Request, res: Response) => {
             .status(406)
             .json({ error: "Wrong email/username or password" });
         } else {
-          outcommingUser = results;
           const userToSign = { email: req.body.email };
 
           const accessToken = generateAccessToken(userToSign);
@@ -138,7 +136,8 @@ router.post("/token", async (req: Request, res: Response) => {
 });
 
 router.delete("/logout", async (req: Request, res: Response) => {
-  RefreshTokens.remove(req.headers["token"].toString());
+  if (req.headers["token"])
+    RefreshTokens.remove(req.headers["token"].toString());
   return res.sendStatus(204);
 });
 

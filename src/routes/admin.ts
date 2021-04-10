@@ -4,10 +4,10 @@ import { Request, Response } from "express";
 import { generateAccessToken } from "../authorization/token";
 import * as bcrypt from "bcrypt";
 import authenticateAdminToken from "../authorization/admin";
+import db from "../database";
+import { MysqlError } from "mysql";
+import { RefreshTokens } from "../authorization/token";
 const router = express.Router();
-
-//do this in database!
-let refreshTokens: Array<any> = [];
 
 router.get("/", authenticateAdminToken, (req: Request, res: Response) => {
   return res.send("Welcome to Hellsio vinyl shop admin endpoint");
@@ -16,7 +16,7 @@ router.get("/", authenticateAdminToken, (req: Request, res: Response) => {
 router.post("/token", async (req: Request, res: Response) => {
   const refreshToken = req.body.token;
   if (!refreshToken) return res.sendStatus(401);
-  if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+  if (!RefreshTokens.includes(refreshToken)) return res.sendStatus(403);
 
   jwt.verify(
     refreshToken,
@@ -31,26 +31,48 @@ router.post("/token", async (req: Request, res: Response) => {
 });
 
 router.post("/login", async (req: Request, res: Response) => {
-  //authenticate user with database
-  if (
-    req.body.username !== "admin" ||
-    !bcrypt.compareSync(
-      req.body.password,
-      bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10)
-    )
-  )
-    return res.sendStatus(403);
+  const incommingUser: { username: string; password: string } = {
+    username: req.body.username,
+    password: req.body.password,
+  };
 
-  const user = { username: req.body.username };
+  db.query(
+    `SELECT user_id, password FROM user WHERE username = ? && Role_role_id=1`,
+    [incommingUser.username],
+    (err: MysqlError, results) => {
+      if (err)
+        return res
+          .status(406)
+          .json({ error: "An error occured while logging you in" });
+      else if (results.length === 0) {
+        return res.status(406).json({ error: "Wrong username or password" });
+      }
 
-  const accessToken = generateAccessToken(user);
-  const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-  refreshTokens.push(refreshToken);
-  return res.json({ accessToken: accessToken, refreshToken: refreshToken });
+      if (!bcrypt.compareSync(incommingUser.password, results[0].password)) {
+        return res.status(406).json({ error: "Wrong username or password" });
+      } else {
+        const userToSign = { email: req.body.username };
+
+        const accessToken = generateAccessToken(userToSign);
+        const refreshToken = jwt.sign(
+          userToSign,
+          process.env.REFRESH_TOKEN_SECRET
+        );
+
+        RefreshTokens.add(refreshToken, results[0].user_id);
+
+        return res.json({
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        });
+      }
+    }
+  );
 });
 
 router.delete("/logout", async (req: Request, res: Response) => {
-  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  if (req.headers["token"])
+    RefreshTokens.remove(req.headers["token"].toString());
   return res.sendStatus(204);
 });
 
