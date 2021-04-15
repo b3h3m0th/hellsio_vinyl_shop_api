@@ -14,14 +14,27 @@ router.get("/", (req: Request, res: Response) => {
 });
 
 router.get("/:code", (req: Request, res: Response) => {
+  let album: any;
   db.query(
-    `SELECT * from album WHERE code = ?`,
+    `SELECT * FROM album WHERE code = ?`,
     [req.params.code],
-    (err: MysqlError, results, fields) => {
+    (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
-      if (results.length === 0) res.status(404).json({ error: "empty" });
-      console.log(results[0]);
-      return res.send(results[0]);
+      if (results.length === 0) return res.status(404).json({ error: "empty" });
+      album = results[0];
+
+      db.query(
+        `SELECT * FROM track LEFT JOIN album ON track.Album_album_id=album.album_id WHERE code = ?`,
+        [req.params.code],
+        (err: MysqlError, results) => {
+          if (err) return res.status(500).json({ error: "server error" });
+          if (results.length === 0)
+            return res.status(404).json({ error: "empty" });
+
+          album.tracks = results;
+          return res.send(album);
+        }
+      );
     }
   );
 });
