@@ -42,7 +42,7 @@ router.get("/:code", (req: Request, res: Response) => {
 router.get("/few/:amount", (req: Request, res: Response) => {
   let result: Array<any> = [];
   db.query(
-    `SELECT * FROM album JOIN artist ON album.Artist_artist_id=artist.artist_id ORDER BY album.added_date DESC LIMIT ?`,
+    `SELECT *, album.name as name, artist.name as artist FROM album JOIN artist ON album.Artist_artist_id=artist.artist_id LIMIT ?`,
     [+req.params.amount],
     (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
