@@ -100,11 +100,15 @@ router.get(
   "/customers",
   authenticateAdminToken,
   async (req: Request, res: Response) => {
-    db.query(`SELECT * from user`, null, (err: MysqlError, results) => {
-      if (err) return res.status(500).json({ error: "server error" });
-      if (results.length === 0) res.status(404).json({ error: "empty" });
-      return res.json(results);
-    });
+    db.query(
+      `SELECT * from user JOIN role ON user.Role_role_id=role.role_id WHERE role.name = "customer"`,
+      null,
+      (err: MysqlError, results) => {
+        if (err) return res.status(500).json({ error: "server error" });
+        if (results.length === 0) res.status(404).json({ error: "empty" });
+        return res.json(results);
+      }
+    );
   }
 );
 
