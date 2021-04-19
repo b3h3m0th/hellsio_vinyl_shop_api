@@ -89,7 +89,7 @@ router.get(
   authenticateAdminToken,
   async (req: Request, res: Response) => {
     db.query(
-      `SELECT *, artist.name as artist from album JOIN artist ON album.Artist_artist_id=artist.artist_id`,
+      `SELECT *, artist.name as artist, album.name as name from album JOIN artist ON album.Artist_artist_id=artist.artist_id`,
       null,
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
