@@ -88,11 +88,15 @@ router.get(
   "/products",
   authenticateAdminToken,
   async (req: Request, res: Response) => {
-    db.query(`SELECT * from album`, null, (err: MysqlError, results) => {
-      if (err) return res.status(500).json({ error: "server error" });
-      if (results.length === 0) res.status(404).json({ error: "empty" });
-      return res.json(results);
-    });
+    db.query(
+      `SELECT *, artist.name as artist from album JOIN artist ON album.Artist_artist_id=artist.artist_id`,
+      null,
+      (err: MysqlError, results) => {
+        if (err) return res.status(500).json({ error: "server error" });
+        if (results.length === 0) res.status(404).json({ error: "empty" });
+        return res.json(results);
+      }
+    );
   }
 );
 
