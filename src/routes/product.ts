@@ -6,7 +6,7 @@ import db from "../database";
 const router = express.Router();
 
 router.get("/", (req: Request, res: Response) => {
-  db.query(`SELECT * from album`, null, (err: MysqlError, results) => {
+  db.query(`SELECT * FROM album`, null, (err: MysqlError, results) => {
     if (err) return res.status(500).json({ error: "server error" });
     if (results.length === 0) res.status(404).json({ error: "empty" });
     return res.send(results);
