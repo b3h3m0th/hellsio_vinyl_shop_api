@@ -145,6 +145,7 @@ router.post(
   "/checkout",
   authenticateUserToken,
   async (req: Request, res: Response) => {
+    console.log(req.body.billingData);
     return res.send("payment successful!");
   }
 );
