@@ -7,6 +7,8 @@ const authenticateUserToken = (req: any, res: Response, next: NextFunction) => {
 
   if (!token) return res.sendStatus(401);
 
+  console.log(token);
+
   jwt.verify(
     token,
     process.env.ACCESS_TOKEN_SECRET,

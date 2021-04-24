@@ -144,9 +144,10 @@ router.delete("/logout", async (req: Request, res: Response) => {
 router.post(
   "/checkout",
   authenticateUserToken,
-  async (req: Request, res: Response) => {
-    console.log(req.body.billingData);
-    return res.send("payment successful!");
+  async (req: Request & { user: any }, res: Response) => {
+    const completeBillingData = { ...req.body.billingData, ...req.user.email };
+    console.log(completeBillingData);
+    return res.status(201).send("payment successful!");
   }
 );
 

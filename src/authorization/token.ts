@@ -4,7 +4,7 @@ import db from "../database";
 
 export const generateAccessToken: (user: any) => string = (user: any) => {
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "10s",
+    expiresIn: "15min",
   });
 };
 

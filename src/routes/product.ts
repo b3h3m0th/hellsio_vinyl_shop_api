@@ -21,6 +21,18 @@ router.get("/format", (req: Request, res: Response) => {
   });
 });
 
+router.get("/new-arrivals", (req: Request, res: Response) => {
+  db.query(
+    `SELECT * FROM album ORDER BY album.added_date DESC`,
+    null,
+    (err: MysqlError, results) => {
+      if (err) return res.status(500).json({ error: "server error" });
+      if (results.length === 0) res.status(404).json({ error: "empty" });
+      return res.send(results);
+    }
+  );
+});
+
 router.get("/:code", (req: Request, res: Response) => {
   let album: any;
   db.query(
