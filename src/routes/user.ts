@@ -8,6 +8,11 @@ import authenticateUserToken from "../authorization/user";
 import db from "../database";
 import { MysqlError } from "mysql";
 import { RefreshTokens } from "../authorization/token";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2020-08-27",
+});
 
 router.get("/", authenticateUserToken, async (req: Request, res: Response) => {
   return res.json({ endpoint: "user" });
@@ -140,6 +145,21 @@ router.delete("/logout", async (req: Request, res: Response) => {
     RefreshTokens.remove(req.headers["token"].toString());
   return res.sendStatus(204);
 });
+
+router.post(
+  "/create-payment-intent",
+  authenticateUserToken,
+  async (req: Request, res: Response) => {
+    const paymentIntent = await stripe.paymentIntents.create({
+      currency: "usd",
+      amount: 100,
+    });
+
+    return res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  }
+);
 
 router.post(
   "/checkout",
