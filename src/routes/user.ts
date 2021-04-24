@@ -168,7 +168,10 @@ router.post(
   "/checkout",
   authenticateUserToken,
   async (req: Request & { user: any }, res: Response) => {
-    const completeBillingData = { ...req.body.billingData, ...req.user.email };
+    const completeBillingData = {
+      ...req.body.billingData,
+      email: req.user.email,
+    };
     console.log(completeBillingData);
     return res.status(201).send("payment successful!");
   }
