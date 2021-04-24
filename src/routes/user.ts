@@ -149,14 +149,16 @@ router.delete("/logout", async (req: Request, res: Response) => {
 router.post(
   "/create-payment-intent",
   authenticateUserToken,
-  async (req: Request, res: Response) => {
+  async (req: Request & { user: any }, res: Response) => {
     if (!req.body.billingData.amount) res.status(402).send("Missing amount");
     const calculateActualAmount = (amount: number) => Math.round(amount * 100);
 
     const paymentIntent = await stripe.paymentIntents.create({
       currency: "usd",
       amount: calculateActualAmount(req.body.billingData.amount),
-    });
+      customer: req.user.email,
+      description: JSON.stringify(req.body.billingData),
+    } as Stripe.PaymentIntentCreateParams);
 
     return res.send({
       clientSecret: paymentIntent.client_secret,
@@ -173,6 +175,8 @@ router.post(
       email: req.user.email,
     };
     console.log(completeBillingData);
+
+    //insert invoice into database
     return res.status(201).send("payment successful!");
   }
 );
