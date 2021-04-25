@@ -16,8 +16,6 @@ export const authenticateStripeToken = (
   const token = req.headers["stripe-authorization"];
   if (!token) return res.sendStatus(401);
 
-  console.log(token, StripeToken.stripeTokens);
-
   if (!StripeToken.stripeTokens.includes(token)) return res.sendStatus(403);
   else next();
 };

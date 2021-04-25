@@ -14,8 +14,8 @@ export class RefreshTokens {
     userId
   ) => {
     db.query(
-      `REPLACE INTO refreshtoken (refresh_token_id, token, User_user_id) VALUES (NULL, '${token}', '${userId}');`,
-      null,
+      `REPLACE INTO refreshtoken (refresh_token_id, token, User_user_id) VALUES (NULL, ?, ?);`,
+      [token, userId],
       (err: MysqlError) => {
         if (err) return console.log(err);
       }
