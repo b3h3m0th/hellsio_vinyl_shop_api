@@ -151,13 +151,14 @@ router.post(
   authenticateUserToken,
   async (req: Request & { user: any }, res: Response) => {
     if (!req.body.billingData.amount) res.status(402).send("Missing amount");
-    console.log(req.body);
+    console.log(req);
     const calculateActualAmount = (amount: number) => Math.round(amount * 100);
 
     const paymentIntent = await stripe.paymentIntents.create({
       currency: "eur",
       amount: calculateActualAmount(req.body.billingData.amount),
       description: JSON.stringify(req.body.billingData),
+      receipt_email: req.user.email,
     } as Stripe.PaymentIntentCreateParams);
 
     return res.send({
