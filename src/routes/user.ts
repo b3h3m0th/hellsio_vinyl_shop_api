@@ -9,6 +9,7 @@ import db from "../database";
 import { MysqlError } from "mysql";
 import { RefreshTokens } from "../authorization/token";
 import Stripe from "stripe";
+import { authenticateStripeToken, StripeToken } from "../authorization/stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2020-08-27",
@@ -146,29 +147,56 @@ router.delete("/logout", async (req: Request, res: Response) => {
   return res.sendStatus(204);
 });
 
+// payments
+
+const stripeTokens = [];
+
 router.post(
   "/create-payment-intent",
   authenticateUserToken,
-  async (req: Request & { user: any }, res: Response) => {
-    if (!req.body.billingData.amount) res.status(402).send("Missing amount");
-    const calculateActualAmount = (amount: number) => Math.round(amount * 100);
+  (req: Request & { user: any }, res: Response) => {
+    db.query(
+      `SELECT * FROM album WHERE album.code IN (?)`,
+      [req.body.billingData.products.map((p: any) => p.code)],
+      (err: MysqlError, results, fields) => {
+        if (err) return res.sendStatus(500);
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      currency: "eur",
-      amount: calculateActualAmount(req.body.billingData.amount),
-      description: JSON.stringify(req.body.billingData),
-      receipt_email: req.user.email,
-    } as Stripe.PaymentIntentCreateParams);
+        const products = results.map((p: any, i: number) => {
+          return { ...p, ...req.body.billingData.products[i] };
+        });
 
-    return res.send({
-      clientSecret: paymentIntent.client_secret,
-    });
+        (async () => {
+          const calculateAmount = (products: any[]) => {
+            return Math.round(
+              products
+                .map((p: any, _: number) => p)
+                .reduce((total: number, current) => {
+                  return current.price * current.quantity + total;
+                }, 0) * 100
+            );
+          };
+
+          const paymentIntent = await stripe.paymentIntents.create({
+            currency: "eur",
+            amount: calculateAmount(products),
+            description: JSON.stringify(req.body.billingData),
+            receipt_email: req.user.email,
+          } as Stripe.PaymentIntentCreateParams);
+
+          StripeToken.stripeTokens.push(paymentIntent.client_secret);
+          return res.send({
+            clientSecret: paymentIntent.client_secret,
+          });
+        })();
+      }
+    );
   }
 );
 
 router.post(
   "/checkout",
   authenticateUserToken,
+  authenticateStripeToken,
   async (req: Request & { user: any }, res: Response) => {
     const completeBillingData = {
       ...req.body.billingData,
