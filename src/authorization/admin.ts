@@ -18,7 +18,7 @@ const authenticateAdminToken = (
       if (err) return res.sendStatus(403);
 
       req.user = user;
-      next();
+      return next();
     }
   );
 };
