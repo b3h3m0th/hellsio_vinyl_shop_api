@@ -92,12 +92,8 @@ export const completeCreatePaymentIntent = (
         } as Stripe.PaymentIntentCreateParams);
 
         db.query(
-          `INSERT INTO invoice (invoice_id, date, total, User_user_id) VALUES (NULL, ?, ?, ?)`,
-          [
-            new Date().toJSON().slice(0, 10),
-            calculateAmount(products) / 100,
-            req.user.user_id,
-          ],
+          `INSERT INTO invoice (invoice_id, date, total, User_user_id) VALUES (NULL, NULL, ?, ?)`,
+          [calculateAmount(products) / 100, req.user.user_id],
           (err: MysqlError, results) => {
             if (err) return res.sendStatus(500);
 
