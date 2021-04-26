@@ -5,6 +5,60 @@ import * as countries from "i18n-iso-countries";
 import Stripe from "stripe";
 import { StripeToken } from "../authorization/stripe";
 
+export class InvoiceHandover {
+  public static invoice_id: number;
+}
+
+export const completeCreatePaymentIntent = (
+  req: Request & any,
+  res: Response,
+  stripe: Stripe
+) =>
+  db.query(
+    `SELECT * FROM album WHERE album.code IN (?)`,
+    [req.body.billingData.products.map((p: any) => p.code)],
+    (err: MysqlError, results) => {
+      if (err) return res.sendStatus(500);
+
+      const products = results.map((p: any, i: number) => {
+        return { ...p, ...req.body.billingData.products[i] };
+      });
+
+      (async () => {
+        const calculateAmount = (products: any[]) => {
+          return Math.round(
+            products
+              .map((p: any, _: number) => p)
+              .reduce((total: number, current) => {
+                return current.price * current.quantity + total;
+              }, 0) * 100
+          );
+        };
+
+        const paymentIntent = await stripe.paymentIntents.create({
+          currency: "eur",
+          amount: calculateAmount(products),
+          description: JSON.stringify(req.body.billingData),
+          receipt_email: req.user.email,
+        } as Stripe.PaymentIntentCreateParams);
+
+        db.query(
+          `INSERT INTO invoice (invoice_id, date, total, User_user_id) VALUES (NULL, NULL, ?, ?)`,
+          [calculateAmount(products) / 100, req.user.user_id],
+          (err: MysqlError, results) => {
+            if (err) return res.sendStatus(500);
+
+            StripeToken.add(paymentIntent.client_secret, results.insertId);
+            InvoiceHandover.invoice_id = results.insertId;
+            return res.send({
+              clientSecret: paymentIntent.client_secret,
+            });
+          }
+        );
+      })();
+    }
+  );
+
 export const completeCheckout = (req: Request & any, res: Response) => {
   console.log(req.body.billingData);
   db.query(
@@ -48,8 +102,34 @@ export const completeCheckout = (req: Request & any, res: Response) => {
 
               //insert products to invoiceline
 
-              //confirm payment
-              return res.status(201).send("payment successful!");
+              db.query(
+                `SELECT album_id FROM album WHERE album.code IN (?)`,
+                [req.body.billingData.products.map((p: any) => p.code)],
+                (err: MysqlError, results) => {
+                  if (err) return res.sendStatus(505);
+
+                  console.log(results);
+
+                  db.query(
+                    `INSERT INTO invoiceline (invoiceline_id, quantity, Invoice_invoice_id, Album_album_id) VALUES ?`,
+                    [
+                      req.body.billingData.products.map((p: any, i: number) => {
+                        return [
+                          null,
+                          p.quantity,
+                          InvoiceHandover.invoice_id,
+                          results[i].album_id,
+                        ];
+                      }),
+                    ],
+                    (err: MysqlError, results, fields) => {
+                      if (err) return res.sendStatus(506);
+                      //confirm payment
+                      return res.status(201).send("payment successful!");
+                    }
+                  );
+                }
+              );
             }
           );
         }
@@ -57,52 +137,3 @@ export const completeCheckout = (req: Request & any, res: Response) => {
     }
   );
 };
-
-export const completeCreatePaymentIntent = (
-  req: Request & any,
-  res: Response,
-  stripe: Stripe
-) =>
-  db.query(
-    `SELECT * FROM album WHERE album.code IN (?)`,
-    [req.body.billingData.products.map((p: any) => p.code)],
-    (err: MysqlError, results) => {
-      if (err) return res.sendStatus(500);
-
-      const products = results.map((p: any, i: number) => {
-        return { ...p, ...req.body.billingData.products[i] };
-      });
-
-      (async () => {
-        const calculateAmount = (products: any[]) => {
-          return Math.round(
-            products
-              .map((p: any, _: number) => p)
-              .reduce((total: number, current) => {
-                return current.price * current.quantity + total;
-              }, 0) * 100
-          );
-        };
-
-        const paymentIntent = await stripe.paymentIntents.create({
-          currency: "eur",
-          amount: calculateAmount(products),
-          description: JSON.stringify(req.body.billingData),
-          receipt_email: req.user.email,
-        } as Stripe.PaymentIntentCreateParams);
-
-        db.query(
-          `INSERT INTO invoice (invoice_id, date, total, User_user_id) VALUES (NULL, NULL, ?, ?)`,
-          [calculateAmount(products) / 100, req.user.user_id],
-          (err: MysqlError, results) => {
-            if (err) return res.sendStatus(500);
-
-            StripeToken.add(paymentIntent.client_secret, results.insertId);
-            return res.send({
-              clientSecret: paymentIntent.client_secret,
-            });
-          }
-        );
-      })();
-    }
-  );
