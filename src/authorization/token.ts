@@ -30,9 +30,7 @@ export class RefreshTokens {
       null,
       (err: MysqlError, results, fields) => {
         if (err) return console.log(err);
-        if ([...results.map(({ token }) => token)].includes(refreshToken))
-          return true;
-        else return false;
+        return [...results.map(({ token }) => token)].includes(refreshToken);
       }
     );
     return true;

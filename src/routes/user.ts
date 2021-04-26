@@ -11,6 +11,10 @@ import { RefreshTokens } from "../authorization/token";
 import Stripe from "stripe";
 import { authenticateStripeToken, StripeToken } from "../authorization/stripe";
 import * as countries from "i18n-iso-countries";
+import {
+  completeCheckout,
+  completeCreatePaymentIntent,
+} from "../stripe/payment";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2020-08-27",
@@ -150,56 +154,33 @@ router.delete("/logout", async (req: Request, res: Response) => {
 
 // payments
 
-const stripeTokens = [];
-
 router.post(
   "/create-payment-intent",
   authenticateUserToken,
   (req: Request & { user: any }, res: Response) => {
     if (!req.user.email.includes("@")) {
       db.query(
-        `SELECT email FROM user WHERE username = ?`,
+        `SELECT email, user_id FROM user WHERE username = ?`,
         [req.user.email],
         (err: MysqlError, results) => {
           if (err) return res.sendStatus(500);
 
           req.user.email = results[0].email;
+          req.user.user_id = results[0].user_id;
 
-          db.query(
-            `SELECT * FROM album WHERE album.code IN (?)`,
-            [req.body.billingData.products.map((p: any) => p.code)],
-            (err: MysqlError, results) => {
-              if (err) return res.sendStatus(500);
+          completeCreatePaymentIntent(req, res, stripe);
+        }
+      );
+    } else {
+      db.query(
+        `SELECT user_id FROM user WHERE email = ?`,
+        [req.user.email],
+        (err: MysqlError, results) => {
+          if (err) return res.sendStatus(500);
 
-              const products = results.map((p: any, i: number) => {
-                return { ...p, ...req.body.billingData.products[i] };
-              });
+          req.user.user_id = results[0].user_id;
 
-              (async () => {
-                const calculateAmount = (products: any[]) => {
-                  return Math.round(
-                    products
-                      .map((p: any, _: number) => p)
-                      .reduce((total: number, current) => {
-                        return current.price * current.quantity + total;
-                      }, 0) * 100
-                  );
-                };
-
-                const paymentIntent = await stripe.paymentIntents.create({
-                  currency: "eur",
-                  amount: calculateAmount(products),
-                  description: JSON.stringify(req.body.billingData),
-                  receipt_email: req.user.email,
-                } as Stripe.PaymentIntentCreateParams);
-
-                StripeToken.stripeTokens.push(paymentIntent.client_secret);
-                return res.send({
-                  clientSecret: paymentIntent.client_secret,
-                });
-              })();
-            }
-          );
+          completeCreatePaymentIntent(req, res, stripe);
         }
       );
     }
@@ -213,48 +194,27 @@ router.post(
   async (req: Request & { user: any }, res: Response) => {
     if (!req.user.email.includes("@")) {
       db.query(
-        `SELECT email FROM user WHERE username = ?`,
+        `SELECT user_id, email FROM user WHERE username = ?`,
         [req.user.email],
         (err: MysqlError, results) => {
-          if (err) return res.sendStatus(500);
+          if (err) res.sendStatus(501);
 
-          const completeBillingData = {
-            ...req.body.billingData,
-            email: results[0].email,
-          };
+          req.user.email = results[0].email;
+          req.user.user_id = results[0].user_id;
 
-          console.log(completeBillingData);
+          completeCheckout(req, res);
+        }
+      );
+    } else {
+      db.query(
+        `SELECT user_id FROM user WHERE email = ?`,
+        [req.user.email],
+        (err: MysqlError, results) => {
+          if (err) return res.sendStatus(502);
 
-          db.query(
-            `INSERT INTO country (country_id, name, iso_code) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE name = ?, iso_code = ?`,
-            [
-              completeBillingData.country,
-              countries.getAlpha3Code(completeBillingData.country, "en"),
-              completeBillingData.country,
-              countries.getAlpha3Code(completeBillingData.country, "en"),
-            ],
-            (err: MysqlError, results, fields) => {
-              if (err) return res.sendStatus(500);
+          req.user.user_id = results[0].user_id;
 
-              console.log(results);
-              db.query(
-                `UPDATE user SET firstname = ?, lastname = ?, birthdate = ?, street = ?, street_number = ? WHERE email = ?`,
-                [
-                  completeBillingData.firstname,
-                  completeBillingData.lastname,
-                  completeBillingData.birthdate,
-                  completeBillingData.street,
-                  completeBillingData.steet_number,
-                  completeBillingData.email,
-                ],
-                (err: MysqlError, results) => {
-                  if (err) console.log(err);
-                  console.log(results);
-                  return res.status(201).send("payment successful!");
-                }
-              );
-            }
-          );
+          completeCheckout(req, res);
         }
       );
     }
