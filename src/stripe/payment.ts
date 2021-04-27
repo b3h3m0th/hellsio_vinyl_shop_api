@@ -60,9 +60,8 @@ export const completeCreatePaymentIntent = (
   );
 
 export const completeCheckout = (req: Request & any, res: Response) => {
-  console.log(req.body.billingData, req.user);
   db.query(
-    `INSERT INTO country (country_id, name, iso_code) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE country_id=LAST_INSERT_ID(country_id), name = ?, iso_code = ?`,
+    `INSERT INTO country (country_id, name, iso_code) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE country_id=LAST_INSERT_ID(country_id)`,
     [
       req.body.billingData.country,
       countries.getAlpha3Code(req.body.billingData.country, "en"),
@@ -73,7 +72,7 @@ export const completeCheckout = (req: Request & any, res: Response) => {
       if (err) return res.sendStatus(503);
 
       db.query(
-        `INSERT INTO location (location_id, postal_code, city, state, Country_country_id) VALUES (NULL, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE location_id=LAST_INSERT_ID(location_id), postal_code = ?, city = ?, state = ?, Country_country_id = ?`,
+        `INSERT INTO location (location_id, postal_code, city, state, Country_country_id) VALUES (NULL, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE location_id=LAST_INSERT_ID(location_id);`,
         [
           req.body.billingData.postal_code,
           req.body.billingData.city,
@@ -88,19 +87,18 @@ export const completeCheckout = (req: Request & any, res: Response) => {
           if (err) return res.sendStatus(504);
 
           db.query(
-            `UPDATE user SET firstname = ?, lastname = ?, birthdate = ?, street = ?, street_number = ? WHERE email = ?;`,
+            `UPDATE user SET firstname = ?, lastname = ?, birthdate = ?, street = ?, street_number = ?, Location_location_id = ? WHERE email = ?;`,
             [
               req.body.billingData.firstname,
               req.body.billingData.lastname,
               req.body.billingData.birthdate,
               req.body.billingData.street,
               req.body.billingData.street_number,
+              results.insertId,
               req.user.email,
             ],
             (err: MysqlError, results) => {
-              if (err) console.log(err);
-
-              //insert products to invoiceline
+              if (err) return res.sendStatus(505);
 
               db.query(
                 `SELECT album_id FROM album WHERE album.code IN (?)`,
@@ -124,6 +122,7 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                     ],
                     (err: MysqlError, results, fields) => {
                       if (err) return res.sendStatus(506);
+
                       //confirm payment
                       return res.status(201).send("payment successful!");
                     }
