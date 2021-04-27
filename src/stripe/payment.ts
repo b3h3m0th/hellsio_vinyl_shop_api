@@ -60,7 +60,7 @@ export const completeCreatePaymentIntent = (
   );
 
 export const completeCheckout = (req: Request & any, res: Response) => {
-  console.log(req.body.billingData);
+  console.log(req.body.billingData, req.user);
   db.query(
     `INSERT INTO country (country_id, name, iso_code) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE country_id=LAST_INSERT_ID(country_id), name = ?, iso_code = ?`,
     [
@@ -88,14 +88,14 @@ export const completeCheckout = (req: Request & any, res: Response) => {
           if (err) return res.sendStatus(504);
 
           db.query(
-            `UPDATE user SET firstname = ?, lastname = ?, birthdate = ?, street = ?, street_number = ? WHERE email = ?`,
+            `UPDATE user SET firstname = ?, lastname = ?, birthdate = ?, street = ?, street_number = ? WHERE email = ?;`,
             [
               req.body.billingData.firstname,
               req.body.billingData.lastname,
               req.body.billingData.birthdate,
               req.body.billingData.street,
-              req.body.billingData.steet_number,
-              req.body.billingData.email,
+              req.body.billingData.street_number,
+              req.user.email,
             ],
             (err: MysqlError, results) => {
               if (err) console.log(err);
