@@ -10,7 +10,6 @@ import { MysqlError } from "mysql";
 import { RefreshTokens } from "../authorization/token";
 import Stripe from "stripe";
 import { authenticateStripeToken, StripeToken } from "../authorization/stripe";
-import * as countries from "i18n-iso-countries";
 import {
   completeCheckout,
   completeCreatePaymentIntent,
