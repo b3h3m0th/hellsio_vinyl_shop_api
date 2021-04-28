@@ -7,6 +7,7 @@ import authenticateAdminToken from "../authorization/admin";
 import db from "../database";
 import { MysqlError } from "mysql";
 import { RefreshTokens } from "../authorization/token";
+import groupBy from "../util/array";
 const router = express.Router();
 
 router.get("/", authenticateAdminToken, (req: Request, res: Response) => {
@@ -86,7 +87,8 @@ router.get(
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
         if (results.length === 0) res.status(404).json({ error: "empty" });
-        return res.json(results);
+
+        return res.json(groupBy(results, (result) => result["invoice_id"]));
       }
     );
   }
