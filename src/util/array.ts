@@ -1,4 +1,7 @@
-export const groupBy = <T>(
+export const groupBy: <T>(
+  array: Array<T>,
+  property: (x: T) => string
+) => { [key: string]: T[] } = <T>(
   array: Array<T>,
   property: (x: T) => string
 ): { [key: string]: Array<T> } =>
