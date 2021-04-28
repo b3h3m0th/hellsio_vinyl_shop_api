@@ -106,8 +106,6 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                 (err: MysqlError, results) => {
                   if (err) return res.sendStatus(505);
 
-                  console.log(results);
-
                   db.query(
                     `INSERT INTO invoiceline (invoiceline_id, quantity, Invoice_invoice_id, Album_album_id) VALUES ?`,
                     [
@@ -123,8 +121,7 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                     (err: MysqlError, results, fields) => {
                       if (err) return res.sendStatus(506);
 
-                      //confirm payment
-                      return res.status(201).send("payment successful!");
+                      return res.status(200).send("payment successful!");
                     }
                   );
                 }
