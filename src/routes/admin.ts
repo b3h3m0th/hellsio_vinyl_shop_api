@@ -115,7 +115,7 @@ router.get(
   authenticateAdminToken,
   async (req: Request, res: Response) => {
     db.query(
-      `SELECT * from user JOIN role ON user.Role_role_id=role.role_id WHERE role.name = "customer"`,
+      `SELECT user.username, user.email, user.phone, user.firstname, user.lastname, user.street, user.street_number, user.birthdate, location.postal_code, location.city, country.name as country_name from user JOIN location on user.Location_location_id=location.location_id JOIN country on location.Country_country_id=country.country_id JOIN role ON user.Role_role_id=role.role_id WHERE role.name = "customer";`,
       null,
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
