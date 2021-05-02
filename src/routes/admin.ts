@@ -179,4 +179,21 @@ router.get(
   }
 );
 
+router.get(
+  "/countries/top/:count",
+  authenticateAdminToken,
+  async (req: Request, res: Response) => {
+    db.query(
+      `SELECT country.name as country_name, COUNT(invoice.invoice_id) as sold_count FROM invoice JOIN user ON invoice.User_user_id=user.user_id JOIN location on user.Location_location_id=location_id JOIN country ON location.Country_country_id=country.country_id GROUP BY country.name ORDER BY sold_count DESC LIMIT ?;`,
+      [+req.params.count],
+      (err: MysqlError, results) => {
+        if (err) return res.status(500).json({ error: "server error" });
+        if (results.length === 0)
+          return res.status(404).json({ error: "empty" });
+        return res.json(results);
+      }
+    );
+  }
+);
+
 export default router;
