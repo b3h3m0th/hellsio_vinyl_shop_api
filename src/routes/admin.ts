@@ -129,12 +129,46 @@ router.get(
 );
 
 router.get(
+  "/products/top/:count",
+  authenticateAdminToken,
+  async (req: Request, res: Response) => {
+    db.query(
+      `SELECT album.album_id, album.name, album.price, album.code, artist.name as artist_name, SUM(invoiceline.quantity) AS sold_count FROM album JOIN artist ON album.Artist_artist_id=artist.artist_id JOIN invoiceline ON invoiceline.Album_album_id=album.album_id GROUP BY album.album_id ORDER BY sold_count DESC, album.name ASC LIMIT ?;`,
+      [+req.params.count],
+      (err: MysqlError, results) => {
+        if (err) return res.status(500).json({ error: "server error" });
+        if (results.length === 0)
+          return res.status(404).json({ error: "empty" });
+        return res.json(results);
+      }
+    );
+  }
+);
+
+router.get(
   "/customers",
   authenticateAdminToken,
   async (req: Request, res: Response) => {
     db.query(
       `SELECT user.username, user.email, user.phone, user.firstname, user.lastname, user.street, user.street_number, user.birthdate, location.postal_code, location.city, country.name as country_name from user JOIN location on user.Location_location_id=location.location_id JOIN country on location.Country_country_id=country.country_id JOIN role ON user.Role_role_id=role.role_id WHERE role.name = "customer";`,
       null,
+      (err: MysqlError, results) => {
+        if (err) return res.status(500).json({ error: "server error" });
+        if (results.length === 0)
+          return res.status(404).json({ error: "empty" });
+        return res.json(results);
+      }
+    );
+  }
+);
+
+router.get(
+  "/customers/top/:count",
+  authenticateAdminToken,
+  async (req: Request, res: Response) => {
+    db.query(
+      `SELECT user.email, user.username, user.firstname, user.lastname, COUNT(invoice.invoice_id) AS invoice_count from invoice JOIN user ON invoice.User_user_id=user.user_id GROUP BY user.user_id ORDER BY invoice_count DESC LIMIT ?;`,
+      [+req.params.count],
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
         if (results.length === 0)
