@@ -100,7 +100,7 @@ router.get(
   authenticateAdminToken,
   async (req: Request, res: Response) => {
     db.query(
-      `SELECT *, artist.name as artist, album.name as name from album JOIN artist ON album.Artist_artist_id=artist.artist_id`,
+      `SELECT *, artist.name as artist, album.name as name from album JOIN artist ON album.Artist_artist_id=artist.artist_id;`,
       null,
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
@@ -122,6 +122,23 @@ router.get(
         if (err) return res.status(500).json({ error: "server error" });
         if (results.length === 0)
           return res.status(404).json({ error: "empty" });
+        return res.json(results);
+      }
+    );
+  }
+);
+
+router.post(
+  "/order/update-delivery-status",
+  authenticateAdminToken,
+  async (req: Request, res: Response) => {
+    if (!req.body.statusText || !req.body.invoice_id) return res.status(406);
+    db.query(
+      `UPDATE invoice SET invoice.Status_status_id = (SELECT status.status_id FROM status WHERE status.text = ?) WHERE invoice.invoice_id = ?;`,
+      [req.body.status_text, req.body.invoice_id],
+      (err: MysqlError, results) => {
+        if (err) return res.status(500).json({ error: "server error" });
+        if (results.length === 0) res.status(404).json({ error: "empty" });
         return res.json(results);
       }
     );
