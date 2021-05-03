@@ -4,6 +4,7 @@ import db from "../database";
 import * as countries from "i18n-iso-countries";
 import Stripe from "stripe";
 import { StripeToken } from "../authorization/stripe";
+import { sendInvoiceEmail } from "../invoice/invoice";
 
 export class InvoiceHandover {
   public static invoice_id: number;
@@ -120,6 +121,8 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                     ],
                     (err: MysqlError, results, fields) => {
                       if (err) return res.sendStatus(506);
+
+                      sendInvoiceEmail(req.user.email);
 
                       return res.status(200).send("payment successful!");
                     }
