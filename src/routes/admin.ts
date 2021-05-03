@@ -167,7 +167,7 @@ router.get(
   authenticateAdminToken,
   async (req: Request, res: Response) => {
     db.query(
-      `SELECT user.email, user.username, user.firstname, user.lastname, COUNT(invoice.invoice_id) AS invoice_count from invoice JOIN user ON invoice.User_user_id=user.user_id GROUP BY user.user_id ORDER BY invoice_count DESC LIMIT ?;`,
+      `SELECT user.email, user.username, user.firstname, user.lastname, SUM(invoice.total) AS total from invoice JOIN user ON invoice.User_user_id=user.user_id GROUP BY user.user_id ORDER BY total DESC LIMIT ?;`,
       [+req.params.count],
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
