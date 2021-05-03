@@ -117,7 +117,7 @@ router.get(
   authenticateAdminToken,
   async (req: Request, res: Response) => {
     db.query(
-      `SELECT SUM(invoice.total) AS total_sum, DATE(invoice.date) AS invoice_day FROM invoice GROUP BY invoice_day;`,
+      `SELECT SUM(invoice.total) AS total_sum, DATE(invoice.date) AS invoice_day FROM invoice GROUP BY invoice_day ORDER BY invoice_day;`,
       null,
       (err: MysqlError, results) => {
         if (err) return res.status(500).json({ error: "server error" });
