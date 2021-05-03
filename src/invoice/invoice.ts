@@ -25,19 +25,12 @@ export const sendInvoiceEmail: (to: string) => void = (to) => {
       })
     );
 
-    let info = await transporter.sendMail({
+    await transporter.sendMail({
       from: "simonostini@gmail.com",
       to: to,
       subject: "Hellsio - Order Confirmation",
       text: "Hello world?",
       template: "index",
     } as any & Mail.Options);
-
-    console.log("Message sent: %s", info);
-    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-    // Preview only available when sending through an Ethereal account
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
   })();
 };
