@@ -8,7 +8,6 @@ export const sendInvoiceEmail: (to: string, invoice: any) => void = (
   to,
   invoice
 ) => {
-  console.log(invoice);
   (async () => {
     let transporter = nodemailer.createTransport({
       service: "gmail",
