@@ -135,9 +135,9 @@
               </td>
 
               <td>
-                Acme <br />
-                John Doe<br />
-                john@example.com
+                {{invoice.0.firstname}}<br />
+                {{invoice.0.lastname}}<br />
+                {{invoice.0.email}}
               </td>
             </tr>
           </table>
@@ -147,13 +147,7 @@
       <tr class="heading">
         <td>Payment Method</td>
 
-        <td>Check #</td>
-      </tr>
-
-      <tr class="details">
-        <td>Check</td>
-
-        <td>1000</td>
+        <td>Stripe</td>
       </tr>
 
       <tr class="heading">
@@ -188,17 +182,3 @@
     </table>
   </div>
 </body>
-
-</html>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <title>Hellsio - Order Confirmation</title>
-  <style></style>
-</head>
-
-<body></body>
-
-</html>
