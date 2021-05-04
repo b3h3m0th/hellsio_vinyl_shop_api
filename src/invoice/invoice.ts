@@ -36,7 +36,7 @@ export const sendInvoiceEmail: (to: string, invoice: any) => void = (
       text: "Hello world?",
       template: "index",
       context: {
-        invoice: { invoice },
+        invoice: invoice,
       },
     } as any & Mail.Options);
   })();
