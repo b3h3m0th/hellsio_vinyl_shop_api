@@ -156,36 +156,16 @@
         <td>Price</td>
       </tr>
 
-      {{#each invoiceline}}
+      {{#each invoice}}
       <tr class="item">
-        <td>{{invoieline}}</td>
-
-        <td>$300.00</td>
+        <td>{{this.code}}</td>
       </tr>
       {{/each}}
-
-      <tr class="item">
-        <td>Website design</td>
-
-        <td>$300.00</td>
-      </tr>
-
-      <tr class="item">
-        <td>Hosting (3 months)</td>
-
-        <td>$75.00</td>
-      </tr>
-
-      <tr class="item last">
-        <td>Domain name (1 year)</td>
-
-        <td>$10.00</td>
-      </tr>
 
       <tr class="total">
         <td></td>
 
-        <td>Total: $385.00</td>
+        <td>Total: $ {{invoice.0.total}}</td>
       </tr>
     </table>
   </div>
