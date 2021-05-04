@@ -2,6 +2,7 @@ import * as nodemailer from "nodemailer";
 import * as hbs from "nodemailer-express-handlebars";
 import Mail from "nodemailer/lib/mailer";
 import * as path from "path";
+const helpers = require("handlebars-helpers")();
 
 export const sendInvoiceEmail: (to: string, invoice: any) => void = (
   to,
