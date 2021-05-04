@@ -116,8 +116,7 @@
               <td></td>
               <td>
                 Invoice #: {{invoice.0.invoice_id}}<br />
-                Created: {{moment invoice.0.date format="YYYY-MM-DD"}}<br />
-                Due: February 1, 2015
+                Date: {{moment invoice.0.date format="YYYY-MM-DD"}}<br />
               </td>
             </tr>
           </table>
@@ -144,7 +143,7 @@
         </td>
       </tr>
 
-      <tr class="heading">
+      <tr class="item">
         <td>Payment Method</td>
         <td></td>
         <td>Stripe</td>
@@ -165,7 +164,7 @@
       {{/each}}
 
       <tr class="total">
-        <td>Total:</td>
+        <td>Total</td>
         <td></td>
         <td>$ {{invoice.0.total}}</td>
       </tr>
