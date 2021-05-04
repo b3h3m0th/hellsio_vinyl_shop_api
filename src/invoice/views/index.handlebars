@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Hellsio - Order Confirmation</title>
+  <title>A simple, clean, and responsive HTML invoice template</title>
 
   <style>
     .invoice-box {
@@ -14,7 +14,7 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
       font-size: 16px;
       line-height: 24px;
-      font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
       color: #555;
     }
 
@@ -29,7 +29,8 @@
       vertical-align: top;
     }
 
-    .invoice-box table tr td:nth-child(2) {
+    .invoice-info,
+    .customer-info {
       text-align: right;
     }
 
@@ -65,7 +66,8 @@
       border-bottom: none;
     }
 
-    .invoice-box table tr.total td:nth-child(2) {
+    .invoice-box table tr.total td:nth-child(2),
+    .total-amount {
       border-top: 2px solid #eee;
       font-weight: bold;
     }
@@ -87,8 +89,7 @@
     /** RTL **/
     .invoice-box.rtl {
       direction: rtl;
-      font-family: Tahoma, "Helvetica Neue", "Helvetica", Helvetica, Arial,
-        sans-serif;
+      font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
     }
 
     .invoice-box.rtl table {
@@ -111,10 +112,9 @@
               <td class="title">
                 <img
                   src="https://raw.githubusercontent.com/b3h3m0th/hellsio_vinyl_shop_api/main/src/invoice/assets/logo/hellsio_full_logo_print_red.png"
-                  style="height: 100%; max-height: 31px" />
+                  style="width: 100%; max-width: 200px" />
               </td>
-              <td></td>
-              <td>
+              <td class="invoice-info">
                 Invoice #: {{invoice.0.invoice_id}}<br />
                 Date: {{moment invoice.0.date format="YYYY-MM-DD"}}<br />
               </td>
@@ -133,7 +133,7 @@
                 6850 Dornbirn, AUSTRIA
               </td>
 
-              <td>
+              <td class="customer-info">
                 {{invoice.0.firstname}}<br />
                 {{invoice.0.lastname}}<br />
                 {{invoice.0.email}}
@@ -143,31 +143,38 @@
         </td>
       </tr>
 
-      <tr class="item">
+      <tr class="heading">
         <td>Payment Method</td>
-        <td></td>
+
+        <td>Status</td>
+      </tr>
+
+      <tr class="details">
         <td>Stripe</td>
+
+        <td>OK</td>
       </tr>
 
       <tr class="heading">
         <td>Item</td>
-        <td>Quantity</td>
+
         <td>Price</td>
       </tr>
 
       {{#each invoice}}
       <tr class="item">
-        <td>{{this.code}}</td>
-        <td>{{this.quantity}}</td>
-        <td>$ {{this.price}}</td>
+        <td>{{this.quantity}}x {{this.code}}</td>
+        <td>${{this.price}}</td>
       </tr>
       {{/each}}
 
       <tr class="total">
-        <td>Total</td>
-        <td></td>
-        <td>$ {{invoice.0.total}}</td>
+        <td class="total-amount">Total</td>
+
+        <td class="total-amount">${{invoice.0.total}}</td>
       </tr>
     </table>
   </div>
 </body>
+
+</html>
