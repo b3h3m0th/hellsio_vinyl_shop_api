@@ -3,7 +3,10 @@ import * as hbs from "nodemailer-express-handlebars";
 import Mail from "nodemailer/lib/mailer";
 import * as path from "path";
 
-export const sendInvoiceEmail: (to: string) => void = (to) => {
+export const sendInvoiceEmail: (to: string, invoice: any) => void = (
+  to,
+  invoice
+) => {
   (async () => {
     let transporter = nodemailer.createTransport({
       service: "gmail",
@@ -31,6 +34,9 @@ export const sendInvoiceEmail: (to: string) => void = (to) => {
       subject: "Hellsio - Order Confirmation",
       text: "Hello world?",
       template: "index",
+      context: {
+        invoice: invoice,
+      },
     } as any & Mail.Options);
   })();
 };

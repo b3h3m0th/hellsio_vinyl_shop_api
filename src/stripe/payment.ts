@@ -122,7 +122,9 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                     (err: MysqlError, results, fields) => {
                       if (err) return res.sendStatus(506);
 
-                      sendInvoiceEmail(req.user.email);
+                      sendInvoiceEmail(req.user.email, {
+                        invoice_id: InvoiceHandover.invoice_id,
+                      });
 
                       return res.status(200).send("payment successful!");
                     }
