@@ -105,7 +105,7 @@
   <div class="invoice-box">
     <table cellpadding="0" cellspacing="0">
       <tr class="top">
-        <td colspan="2">
+        <td>
           <table>
             <tr>
               <td class="title">
@@ -113,7 +113,7 @@
                   src="https://raw.githubusercontent.com/b3h3m0th/hellsio_vinyl_shop/master/src/assets/icons/logo/full/hellsio_full_logo_print_red_min.png"
                   style="width: 100%; max-width: 300px" />
               </td>
-
+              <td></td>
               <td>
                 Invoice #: {{invoice.0.invoice_id}}<br />
                 Created: {{moment invoice.0.date format="YYYY-MM-DD"}}<br />
@@ -125,7 +125,7 @@
       </tr>
 
       <tr class="information">
-        <td colspan="2">
+        <td colspan="4"">
           <table>
             <tr>
               <td>
@@ -144,28 +144,30 @@
         </td>
       </tr>
 
-      <tr class="heading">
+      <tr class=" heading">
         <td>Payment Method</td>
-
+        <td></td>
         <td>Stripe</td>
       </tr>
 
       <tr class="heading">
         <td>Item</td>
-
+        <td>Quantity</td>
         <td>Price</td>
       </tr>
 
       {{#each invoice}}
       <tr class="item">
         <td>{{this.code}}</td>
+        <td>{{this.quantity}}</td>
+        <td>{{this.price}}</td>
       </tr>
       {{/each}}
 
       <tr class="total">
+        <td>Total:</td>
         <td></td>
-
-        <td>Total: $ {{invoice.0.total}}</td>
+        <td>$ {{invoice.0.total}}</td>
       </tr>
     </table>
   </div>

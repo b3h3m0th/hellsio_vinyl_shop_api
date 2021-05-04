@@ -123,7 +123,7 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                       if (err) return res.sendStatus(506);
 
                       db.query(
-                        `SELECT invoice.invoice_id, invoice.date, invoice.total, status.text as status, album.code, invoiceline.quantity, user.firstname, user.lastname, user.email, user.street, user.street_number, location.postal_code, location.city, country.name as country_name FROM invoice JOIN invoiceline ON invoiceline.Invoice_invoice_id=invoice.invoice_id JOIN album ON invoiceline.Album_album_id=album.album_id JOIN user ON invoice.User_user_id=user.user_id JOIN location ON user.Location_location_id=location.location_id JOIN country ON location.Country_country_id=country.country_id JOIN status ON invoice.Status_status_id=status.status_id WHERE invoice.invoice_id = ?;`,
+                        `SELECT invoice.invoice_id, invoice.date, invoice.total, status.text as status, album.code, album.price, invoiceline.quantity, user.firstname, user.lastname, user.email, user.street, user.street_number, location.postal_code, location.city, country.name as country_name FROM invoice JOIN invoiceline ON invoiceline.Invoice_invoice_id=invoice.invoice_id JOIN album ON invoiceline.Album_album_id=album.album_id JOIN user ON invoice.User_user_id=user.user_id JOIN location ON user.Location_location_id=location.location_id JOIN country ON location.Country_country_id=country.country_id JOIN status ON invoice.Status_status_id=status.status_id WHERE invoice.invoice_id = ?;`,
                         [InvoiceHandover.invoice_id],
                         (err: MysqlError, results) => {
                           if (err) return res.sendStatus(500);
