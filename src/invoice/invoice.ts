@@ -30,7 +30,7 @@ export const sendInvoiceEmail: (to: string, invoice: any) => void = (
     );
 
     await transporter.sendMail({
-      from: "simonostini@gmail.com",
+      from: `\"Hellsio - Customer Service\" <${process.env.GMAIL_USER}>`,
       to: to,
       subject: "Hellsio - Order Confirmation",
       text: "Hello world?",
