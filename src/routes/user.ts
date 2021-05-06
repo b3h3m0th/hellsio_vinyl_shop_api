@@ -183,7 +183,10 @@ router.post(
           req.user.email = results[0].email;
           req.user.user_id = results[0].user_id;
 
-          if (!isEmailVerified(req.user.email)) return res.sendStatus(208);
+          if (!isEmailVerified(req.user.email)) {
+            sendVerificationEmail(req.user.email);
+            return res.sendStatus(208);
+          }
 
           completeCreatePaymentIntent(req, res, stripe);
         }
@@ -197,7 +200,10 @@ router.post(
 
           req.user.user_id = results[0].user_id;
 
-          if (!isEmailVerified(req.user.email)) return res.sendStatus(208);
+          if (!isEmailVerified(req.user.email)) {
+            sendVerificationEmail(req.user.email);
+            return res.sendStatus(208);
+          }
 
           completeCreatePaymentIntent(req, res, stripe);
         }
