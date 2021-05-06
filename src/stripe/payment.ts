@@ -108,7 +108,7 @@ export const completeCheckout = (req: Request & any, res: Response) => {
                   if (err) return res.sendStatus(505);
 
                   db.query(
-                    `INSERT INTO invoiceline (invoiceline_id, quantity, Invoice_invoice_id, Album_album_id) VALUES ?`,
+                    `INSERT INTO invoiceline (invoiceline_id, quantity, Invoice_invoice_id, Album_album_id) VALUES ?;`,
                     [
                       req.body.billingData.products.map((p: any, i: number) => {
                         return [
