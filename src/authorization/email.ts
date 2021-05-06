@@ -17,7 +17,7 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
 
       db.query(
         `INSERT INTO emailtoken (emailtoken_id, token, User_user_id) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE emailtoken_id=LAST_INSERT_ID(emailtoken_id), token=?;`,
-        [emailToken, results[1].user_id, emailToken],
+        [emailToken, results[0].user_id, emailToken],
         (err: MysqlError, results) => {
           if (err) return console.log(err);
 

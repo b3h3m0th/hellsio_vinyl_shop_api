@@ -22,17 +22,20 @@ const authenticateUserToken = (req: any, res: Response, next: NextFunction) => {
 };
 
 export const isEmailVerified = (email: string) => {
-  let result: boolean = false;
+  let email_verified: boolean = false;
+
   db.query(
     `SELECT user.email_verified FROM user WHERE user.email = ?;`,
     [email],
     (err: MysqlError, results) => {
-      if (err) result = false;
-      result = results[0].email_verified as boolean;
+      if (err) return false;
+      email_verified = results[0].email_verified as boolean;
     }
   );
 
-  return result;
+  return setTimeout(() => {
+    return email_verified;
+  }, 100);
 };
 
 export default authenticateUserToken;
