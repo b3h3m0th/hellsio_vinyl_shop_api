@@ -1,7 +1,8 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { MysqlError } from "mysql";
 import db from "../database";
+import { sendVerificationEmail } from "./email";
 
 const authenticateUserToken = (req: any, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
@@ -21,21 +22,22 @@ const authenticateUserToken = (req: any, res: Response, next: NextFunction) => {
   );
 };
 
-export const isEmailVerified = (email: string) => {
-  let email_verified: boolean = false;
-
+export const isEmailVerified = (
+  req: any & Request,
+  res: Response & any,
+  callback: () => void
+) => {
   db.query(
     `SELECT user.email_verified FROM user WHERE user.email = ?;`,
-    [email],
+    [req.user.email],
     (err: MysqlError, results) => {
       if (err) return false;
-      email_verified = results[0].email_verified as boolean;
+      if (!!!results[0].email_verified) {
+        sendVerificationEmail(req.user.email);
+        return res.sendStatus(208);
+      } else callback();
     }
   );
-
-  return setTimeout(() => {
-    return email_verified;
-  }, 100);
 };
 
 export default authenticateUserToken;
