@@ -48,7 +48,6 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
               from: `\"Hellsio - Customer Service\" <${process.env.GMAIL_USER}>`,
               to: to,
               subject: "Hellsio - Verify Email",
-              text: `Please verify your email by visiting this link: ${verifyEmailURL}.`,
               template: "email_verification",
               context: {
                 verificationURL: verifyEmailURL,
