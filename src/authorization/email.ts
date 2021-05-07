@@ -40,7 +40,7 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
                   engine: "express-handlebars" as any,
                   defaultLayout: false,
                 } as any,
-                viewPath: path.resolve(__dirname, "views"),
+                viewPath: path.resolve(__dirname, "../invoice/views"),
               })
             );
 
