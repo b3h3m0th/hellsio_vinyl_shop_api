@@ -33,8 +33,7 @@ export const sendInvoiceEmail: (to: string, invoice: any) => void = (
       from: `\"Hellsio - Customer Service\" <${process.env.GMAIL_USER}>`,
       to: to,
       subject: "Hellsio - Order Confirmation",
-      text: "Hello world?",
-      template: "index",
+      template: "receipt",
       context: {
         invoice: invoice,
       },

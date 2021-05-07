@@ -4,6 +4,8 @@ import Mail from "nodemailer/lib/mailer";
 require("handlebars-helpers")();
 import { v4 as uuidv4 } from "uuid";
 import db from "../database";
+import * as hbs from "nodemailer-express-handlebars";
+import * as path from "path";
 
 export const sendVerificationEmail: (to: string) => void = (to) => {
   const emailToken = uuidv4();
@@ -31,11 +33,26 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
               },
             });
 
+            transporter.use(
+              "compile",
+              hbs({
+                viewEngine: {
+                  engine: "express-handlebars" as any,
+                  defaultLayout: false,
+                } as any,
+                viewPath: path.resolve(__dirname, "views"),
+              })
+            );
+
             await transporter.sendMail({
               from: `\"Hellsio - Customer Service\" <${process.env.GMAIL_USER}>`,
               to: to,
               subject: "Hellsio - Verify Email",
               text: `Please verify your email by visiting this link: ${verifyEmailURL}.`,
+              template: "email_verification",
+              context: {
+                verificationURL: verifyEmailURL,
+              },
             } as any & Mail.Options);
           })();
         }
