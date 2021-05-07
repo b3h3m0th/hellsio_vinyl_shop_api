@@ -240,4 +240,28 @@ router.post(
   }
 );
 
+router.get(
+  "/resend-email-verification",
+  authenticateUserToken,
+  (req: Request & { user: any }, res: Response) => {
+    if (!req.user.email.includes("@")) {
+      db.query(
+        `SELECT email FROM user WHERE username = ?`,
+        [req.user.email],
+        (err: MysqlError, results) => {
+          if (err) res.sendStatus(501);
+
+          req.user.email = results[0].email;
+
+          sendVerificationEmail(req.user.email);
+          return res.sendStatus(200);
+        }
+      );
+    } else {
+      sendVerificationEmail(req.user.email);
+      return res.sendStatus(200);
+    }
+  }
+);
+
 export default router;

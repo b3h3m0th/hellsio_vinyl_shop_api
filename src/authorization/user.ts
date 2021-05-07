@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { MysqlError } from "mysql";
 import db from "../database";
-import { sendVerificationEmail } from "./email";
 
 const authenticateUserToken = (req: any, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
@@ -33,7 +32,6 @@ export const isEmailVerified = (
     (err: MysqlError, results) => {
       if (err) return false;
       if (!!!results[0].email_verified) {
-        sendVerificationEmail(req.user.email);
         return res.sendStatus(208);
       } else callback();
     }
