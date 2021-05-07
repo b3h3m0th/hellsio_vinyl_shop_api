@@ -35,6 +35,11 @@
             margin-top: 30px;
             text-transform: uppercase;
             font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .alternative-link {
+            color: white;
         }
     </style>
 </head>
@@ -43,9 +48,10 @@
     <div class="verification-box">
         <img src="../assets/logo/hellsio_full_logo_print_red.png" alt="Hellsio Logo">
         <h1>Verify your Email address</h1>
-        <span class="">Please verify your Email address by pressing the following button. You can also use the link
+        <span>Please verify your Email address by pressing the following button. You can also use the link below
             alternatively.</span>
         <a href={{verificationURL}}><button>Verify your Email</button></a>
+        <a href={{verificationURL}} class="alternative-link">Verify your Email</a>
     </div>
 </body>
 
