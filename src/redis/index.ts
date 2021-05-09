@@ -1,4 +1,6 @@
-import redis from "redis";
+import * as redis from "redis";
+
+export const redisHellsioPrefix = "hellsio-" as const;
 
 const client = redis.createClient({
   port: process.env.REDISPORT || 6379,

@@ -8,7 +8,10 @@ import db from "../database";
 import { MysqlError } from "mysql";
 import { RefreshTokens } from "../authorization/token";
 import groupBy from "../util/array";
+import siteContentRoute from "./adminSub";
 const router = express.Router();
+
+router.use("/site-content", siteContentRoute);
 
 router.get("/", authenticateAdminToken, (req: Request, res: Response) => {
   return res.send("Welcome to Hellsio vinyl shop admin endpoint");
