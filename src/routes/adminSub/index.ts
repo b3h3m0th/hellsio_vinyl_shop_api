@@ -5,27 +5,21 @@ import authenticateAdminToken from "../../authorization/admin";
 import redisClient, { redisHellsioPrefix } from "../../redis";
 const router = express.Router();
 
-router.post(
-  "/edit",
-  authenticateAdminToken,
-  (req: Request & { key: string; value: string }, res: Response) => {
-    redisClient.set(
-      `${redisHellsioPrefix}${req.key}`,
-      req.value,
-      (err: RedisError) => {
-        if (err) return res.sendStatus(500);
-        else return res.sendStatus(200);
-      }
-    );
-  }
-);
+router.post("/edit", authenticateAdminToken, (req: Request, res: Response) => {
+  redisClient.set(
+    `${redisHellsioPrefix}${req.body.key}`,
+    req.body.value,
+    (err: RedisError) => {
+      if (err) {
+        console.log(err);
+        return res.sendStatus(500);
+      } else return res.sendStatus(200);
+    }
+  );
+});
 
-router.get(
-  "/value",
-  authenticateAdminToken,
-  (req: Request & { key: string }, res: Response) => {
-    return res.send(redisClient.get(`${redisHellsioPrefix}${req.key}`));
-  }
-);
+router.get("/value", authenticateAdminToken, (req: Request, res: Response) => {
+  return res.send(redisClient.get(`${redisHellsioPrefix}${req.body.key}`));
+});
 
 export default router;
