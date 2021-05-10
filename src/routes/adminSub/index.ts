@@ -19,7 +19,13 @@ router.post("/edit", authenticateAdminToken, (req: Request, res: Response) => {
 });
 
 router.get("/value", authenticateAdminToken, (req: Request, res: Response) => {
-  return res.send(redisClient.get(`${redisHellsioPrefix}${req.body.key}`));
+  redisClient.get(
+    `${redisHellsioPrefix}${req.headers["key"]}`,
+    (err: RedisError, reply) => {
+      if (err) return res.sendStatus(500);
+      else return res.send(reply);
+    }
+  );
 });
 
 export default router;
