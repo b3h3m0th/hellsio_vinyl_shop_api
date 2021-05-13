@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"nodemon\" \"redis-server\"",
+    "start": "concurrently \"nodemon\" \"redis-server redis.windows.conf\"",
     "build": "tsc --build tsconfig.json",
     "serve": "node ./dist/index.js"
   },
