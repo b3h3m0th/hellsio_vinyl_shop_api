@@ -18,7 +18,7 @@ router.post("/edit", authenticateAdminToken, (req: Request, res: Response) => {
   );
 });
 
-router.get("/value", authenticateAdminToken, (req: Request, res: Response) => {
+router.get("/value", (req: Request, res: Response) => {
   redisClient.get(
     `${redisHellsioPrefix}${req.headers["key"]}`,
     (err: RedisError, reply) => {
