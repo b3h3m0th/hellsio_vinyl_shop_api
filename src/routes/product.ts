@@ -59,6 +59,10 @@ router.get("/:code", (req: Request, res: Response) => {
   );
 });
 
+router.get("/some", (req: Request, res: Response) => {
+  console.log(req.params);
+});
+
 router.get("/few/:amount", (req: Request, res: Response) => {
   let result: Array<any> = [];
   db.query(
