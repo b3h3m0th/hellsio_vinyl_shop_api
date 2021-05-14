@@ -49,6 +49,18 @@ router.get("/new-arrivals", (req: Request, res: Response) => {
   );
 });
 
+router.get("/popular", (req: Request, res: Response) => {
+  db.query(
+    `SELECT *, genre.name AS genre, album.name AS name, COUNT(invoiceline.Album_album_id) as popularity FROM album JOIN genre ON album.Genre_genre_id=genre.genre_id JOIN invoiceline ON invoiceline.Album_album_id=album.album_id GROUP BY invoiceline.Album_album_id ORDER BY popularity DESC;`,
+    null,
+    (err: MysqlError, results) => {
+      if (err) return res.status(500).json({ error: "server error" });
+      if (results.length === 0) return res.status(404).json({ error: "empty" });
+      return res.send(results);
+    }
+  );
+});
+
 router.get("/:code", (req: Request, res: Response) => {
   let album: any;
   db.query(
