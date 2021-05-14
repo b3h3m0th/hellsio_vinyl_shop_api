@@ -18,7 +18,7 @@ router.get("/some", (req: Request, res: Response) => {
     return res.sendStatus(405);
 
   db.query(
-    `SELECT * FROM album WHERE album.code IN (?);`,
+    `SELECT *, album.name as name, artist.name as artist FROM album JOIN artist ON album.Artist_artist_id=artist.artist_id WHERE album.code IN (?);`,
     [req.query.albums],
     (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
