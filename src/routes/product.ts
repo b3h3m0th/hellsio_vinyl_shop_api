@@ -13,10 +13,25 @@ router.get("/", (req: Request, res: Response) => {
   });
 });
 
+router.get("/some", (req: Request, res: Response) => {
+  if (!req.query.albums || req.query.albums.length <= 0)
+    return res.sendStatus(405);
+
+  db.query(
+    `SELECT * FROM album WHERE album.code IN (?);`,
+    [req.query.albums],
+    (err: MysqlError, results) => {
+      if (err) return res.status(500).json({ error: "server error" });
+      if (results.length === 0) return res.status(404).json({ error: "empty" });
+      return res.send(results);
+    }
+  );
+});
+
 router.get("/format", (req: Request, res: Response) => {
   db.query(`SELECT * FROM format`, null, (err: MysqlError, results) => {
     if (err) return res.status(500).json({ error: "server error" });
-    if (results.length === 0) res.status(404).json({ error: "empty" });
+    if (results.length === 0) return res.status(404).json({ error: "empty" });
     return res.send(results);
   });
 });
@@ -27,7 +42,7 @@ router.get("/new-arrivals", (req: Request, res: Response) => {
     null,
     (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
-      if (results.length === 0) res.status(404).json({ error: "empty" });
+      if (results.length === 0) return res.status(404).json({ error: "empty" });
       return res.send(results);
     }
   );
@@ -59,18 +74,13 @@ router.get("/:code", (req: Request, res: Response) => {
   );
 });
 
-router.get("/some", (req: Request, res: Response) => {
-  console.log(req.params);
-});
-
 router.get("/few/:amount", (req: Request, res: Response) => {
-  let result: Array<any> = [];
   db.query(
     `SELECT *, album.name as name, artist.name as artist FROM album JOIN artist ON album.Artist_artist_id=artist.artist_id LIMIT ?`,
     [+req.params.amount],
     (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
-      if (results.length === 0) res.status(404).json({ error: "empty" });
+      if (results.length === 0) return res.status(404).json({ error: "empty" });
       return res.send(results);
     }
   );
