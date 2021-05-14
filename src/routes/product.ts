@@ -6,17 +6,18 @@ import db from "../database";
 const router = express.Router();
 
 router.get("/", (req: Request, res: Response) => {
-  db.query(`SELECT * FROM album`, null, (err: MysqlError, results) => {
-    if (err) return res.status(500).json({ error: "server error" });
-    if (results.length === 0) res.status(404).json({ error: "empty" });
-    return res.send(results);
-  });
+  db.query(
+    `SELECT *, genre.name as genre, album.name as name FROM album JOIN genre ON album.Genre_genre_id=genre.genre_id;`,
+    null,
+    (err: MysqlError, results) => {
+      if (err) return res.status(500).json({ error: "server error" });
+      if (results.length === 0) res.status(404).json({ error: "empty" });
+      return res.send(results);
+    }
+  );
 });
 
 router.get("/some", (req: Request, res: Response) => {
-  if (!req.query.albums || req.query.albums.length <= 0)
-    return res.sendStatus(405);
-
   db.query(
     `SELECT *, album.name as name, artist.name as artist FROM album JOIN artist ON album.Artist_artist_id=artist.artist_id WHERE album.code IN (?);`,
     [req.query.albums],
@@ -38,7 +39,7 @@ router.get("/format", (req: Request, res: Response) => {
 
 router.get("/new-arrivals", (req: Request, res: Response) => {
   db.query(
-    `SELECT * FROM album ORDER BY album.added_date DESC`,
+    `SELECT *, genre.name AS genre, album.name as name FROM album JOIN genre on album.Genre_genre_id=genre.genre_id ORDER BY album.added_date DESC`,
     null,
     (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
