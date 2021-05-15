@@ -3,7 +3,10 @@ import { Request, Response } from "express";
 import { MysqlError } from "mysql";
 import authenticateAdminToken from "../authorization/admin";
 import db from "../database";
+import navRoute from "./productSub";
 const router = express.Router();
+
+router.use("/nav", navRoute);
 
 router.get("/", (req: Request, res: Response) => {
   db.query(
