@@ -9,11 +9,10 @@ router.post(
   "/rate",
   authenticateUserToken,
   async (req: Request & { user: any }, res: Response) => {
-    console.log(req.body);
     if (!req.user.email.includes("@")) {
       db.query(
-        `REPLACE INTO rating (rating_id, value, Album_album_id, User_user_id) VALUES (NULL, ?, (SELECT album.album_id FROM album WHERE album.code = ?), (SELECT user.user_id FROM user WHERE user.username = ?));`,
-        [+req.body.value, req.body.album_code, req.user.email],
+        `INSERT INTO rating (rating_id, value, Album_album_id, User_user_id) VALUES (NULL, ?, (SELECT album.album_id FROM album WHERE album.code = ?), (SELECT user.user_id FROM user WHERE user.username = ?)) ON DUPLICATE KEY UPDATE rating.rating_id=LAST_INSERT_ID(rating.rating_id), value = ?;`,
+        [+req.body.value, req.body.album_code, req.user.email, +req.body.value],
         (err: MysqlError) => {
           if (err) return res.sendStatus(500);
           return res.sendStatus(201);
@@ -21,8 +20,8 @@ router.post(
       );
     } else {
       db.query(
-        `REPLACE INTO rating (rating_id, value, Album_album_id, User_user_id) VALUES (NULL, ?, (SELECT album.album_id FROM album WHERE album.code = ?), (SELECT user.user_id FROM user WHERE user.email = ?));`,
-        [+req.body.value, req.body.album_code, req.user.email],
+        `INSERT INTO rating (rating_id, value, Album_album_id, User_user_id) VALUES (NULL, ?, (SELECT album.album_id FROM album WHERE album.code = ?), (SELECT user.user_id FROM user WHERE user.email = ?)) ON DUPLICATE KEY UPDATE rating.rating_id=LAST_INSERT_ID(rating.rating_id), value = ?;`,
+        [+req.body.value, req.body.album_code, req.user.email, +req.body.value],
         (err: MysqlError) => {
           if (err) return res.sendStatus(500);
           return res.sendStatus(201);
