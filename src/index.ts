@@ -13,6 +13,7 @@ import mainRoute from "./routes/main";
 import adminRoute from "./routes/admin";
 import productRoute from "./routes/product";
 import genreRoute from "./routes/genre";
+import ratingRoute from "./routes/rating";
 
 app.use(cors("*"));
 app.use(morgan("dev"));
@@ -26,6 +27,7 @@ app.use(`/${base}/user`, authRoute);
 app.use(`/${base}/admin`, adminRoute);
 app.use(`/${base}/product`, productRoute);
 app.use(`/${base}/genre`, genreRoute);
+app.use(`/${base}/rating`, ratingRoute);
 
 app.get("/", (req: Request, res: Response) => {
   res.redirect(`/${base}`);

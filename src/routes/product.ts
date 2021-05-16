@@ -10,7 +10,7 @@ router.use("/nav", navRoute);
 
 router.get("/", (req: Request, res: Response) => {
   db.query(
-    `SELECT *, genre.name as genre, album.name as name FROM album JOIN genre ON album.Genre_genre_id=genre.genre_id;`,
+    `SELECT *, album.name as name, genre.name as genre FROM album JOIN genre ON album.Genre_genre_id=genre.genre_id ORDER BY album.album_id ASC;`,
     null,
     (err: MysqlError, results) => {
       if (err) return res.status(500).json({ error: "server error" });
