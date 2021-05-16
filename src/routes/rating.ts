@@ -31,4 +31,18 @@ router.post(
   }
 );
 
+router.get("/:code", (req: Request, res: Response) => {
+  if (!req.params.code || +req.params.code > 5 || +req.params.code < 1)
+    return res.sendStatus(403);
+
+  db.query(
+    `SELECT album.code, AVG(rating.value) AS average FROM rating JOIN album ON album.album_id=rating.Album_album_id WHERE album.code = ?;`,
+    [req.params.code],
+    (err: MysqlError, results) => {
+      if (err) return res.sendStatus(500);
+      return res.send(results);
+    }
+  );
+});
+
 export default router;
