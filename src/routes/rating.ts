@@ -40,7 +40,7 @@ router.get("/:code", (req: Request, res: Response) => {
     [req.params.code],
     (err: MysqlError, results) => {
       if (err) return res.sendStatus(500);
-      return res.send(results);
+      return res.send(results[0]);
     }
   );
 });
