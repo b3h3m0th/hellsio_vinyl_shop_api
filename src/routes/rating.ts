@@ -36,7 +36,7 @@ router.get("/:code", (req: Request, res: Response) => {
     return res.sendStatus(403);
 
   db.query(
-    `SELECT album.code, AVG(rating.value) AS average FROM rating JOIN album ON album.album_id=rating.Album_album_id WHERE album.code = ?;`,
+    `SELECT album.code, AVG(rating.value) as average, COUNT(rating.rating_id) as ratings_count FROM rating JOIN album ON album.album_id=rating.Album_album_id WHERE album.code = ?;`,
     [req.params.code],
     (err: MysqlError, results) => {
       if (err) return res.sendStatus(500);
