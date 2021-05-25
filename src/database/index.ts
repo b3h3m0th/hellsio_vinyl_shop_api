@@ -2,9 +2,7 @@ import mysql, {
   MysqlError,
   Pool,
   PoolConnection,
-  Query,
   queryCallback,
-  QueryOptions,
   createPool,
 } from "mysql";
 
