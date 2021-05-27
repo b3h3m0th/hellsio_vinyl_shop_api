@@ -280,4 +280,17 @@ router.post("/forgot-password", (req: Request, res: Response) => {
   );
 });
 
+router.post("/redefine-password", (req: Request, res: Response) => {
+  db.query(
+    `SELECT user.user_id, user.email FROM passwordresettoken JOIN user ON user.user_id=passwordresettoken.User_user_id WHERE passwordresettoken.token = ?;`,
+    [req.body.token],
+    (err: MysqlError, results) => {
+      if (err) res.sendStatus(501);
+      if (!results || results.length === 0) return res.sendStatus(208);
+
+      return res.sendStatus(201);
+    }
+  );
+});
+
 export default router;
