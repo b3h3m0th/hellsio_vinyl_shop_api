@@ -288,6 +288,17 @@ router.post("/redefine-password", (req: Request, res: Response) => {
       if (err) res.sendStatus(501);
       if (!results || results.length === 0) return res.sendStatus(208);
 
+      db.query(
+        `UPDATE user SET password= `,
+        [req.body.token],
+        (err: MysqlError, results) => {
+          if (err) res.sendStatus(501);
+          if (!results || results.length === 0) return res.sendStatus(208);
+
+          return res.sendStatus(201);
+        }
+      );
+
       return res.sendStatus(201);
     }
   );

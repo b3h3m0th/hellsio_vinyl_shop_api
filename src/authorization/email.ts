@@ -62,7 +62,7 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
 
 export const sendPasswordResetEmail = (to: string) => {
   const resetToken = uuidv4();
-  const resetPasswordURL = `${process.env.FRONTEND_BASE_URL}/de/define-new-password/${resetToken}`;
+  const resetPasswordURL = `${process.env.FRONTEND_BASE_URL}/redefine-password/${resetToken}`;
 
   db.query(
     `SELECT user_id FROM user WHERE user.email = ?;`,
