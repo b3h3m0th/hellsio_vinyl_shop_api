@@ -34,8 +34,8 @@ router.post("/register", async (req: Request, res: Response) => {
   const hashedPassword: string = bcrypt.hashSync(req.body.password, 10);
 
   db.query(
-    `INSERT INTO user (user_id, firstname, lastname, username, email, email_verified, phone, password, birthdate, street, street_number, Role_role_id, Location_location_id) VALUES (NULL, NULL, NULL, '${req.body.username}', '${req.body.email}', 0, NULL, '${hashedPassword}', NULL, NULL, NULL, '2', '1');`,
-    null,
+    `INSERT INTO user (user_id, firstname, lastname, username, email, email_verified, phone, password, birthdate, street, street_number, Role_role_id, Location_location_id) VALUES (NULL, NULL, NULL, ?, ?, 0, NULL, ?, NULL, NULL, NULL, '2', '1');`,
+    [req.body.username, req.body.email, hashedPassword],
     (err: MysqlError, results, fields) => {
       if (err && err.code === "ER_DUP_ENTRY") {
         return res
@@ -280,26 +280,36 @@ router.post("/forgot-password", (req: Request, res: Response) => {
   );
 });
 
-router.post("/redefine-password", (req: Request, res: Response) => {
+router.post("/redefine-password", (req: Request & any, res: Response) => {
   db.query(
-    `SELECT user.user_id, user.email FROM passwordresettoken JOIN user ON user.user_id=passwordresettoken.User_user_id WHERE passwordresettoken.token = ?;`,
+    `SELECT user.user_id, user.email, passwordresettoken.passwordresettoken_id FROM passwordresettoken JOIN user ON user.user_id=passwordresettoken.User_user_id WHERE passwordresettoken.token = ?;`,
     [req.body.token],
     (err: MysqlError, results) => {
       if (err) res.sendStatus(501);
       if (!results || results.length === 0) return res.sendStatus(208);
 
+      req.user_id = results[0].user_id;
+      req.passwordresettoken_id = results[0].passwordresettoken_id;
+
+      const hashedPassword = bcrypt.hashSync(req.body.newPassword, 10);
+
       db.query(
-        `UPDATE user SET password= `,
-        [req.body.token],
+        `UPDATE user SET password=? WHERE user.user_id=?;`,
+        [hashedPassword, req.user_id],
         (err: MysqlError, results) => {
           if (err) res.sendStatus(501);
-          if (!results || results.length === 0) return res.sendStatus(208);
 
-          return res.sendStatus(201);
+          db.query(
+            `DELETE FROM passwordresettoken WHERE passwordresettoken.passwordresettoken_id=?`,
+            [req.passwordresettoken_id],
+            (err: MysqlError, results) => {
+              if (err) res.sendStatus(501);
+
+              return res.sendStatus(201);
+            }
+          );
         }
       );
-
-      return res.sendStatus(201);
     }
   );
 });
