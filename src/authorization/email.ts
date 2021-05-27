@@ -59,3 +59,56 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
     }
   );
 };
+
+export const sendPasswordResetEmail = (to: string) => {
+  const emailToken = uuidv4();
+  const resetPasswordURL = `${process.env.BACKEND_BASE_URL}/user/reset-password/${emailToken}`;
+
+  db.query(
+    `SELECT user_id FROM user WHERE user.email = ?;`,
+    [to],
+    (err: MysqlError, results) => {
+      if (err) return;
+
+      db.query(
+        `INSERT INTO passwordresettoken (passwordresettoken_id, token, User_user_id) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE passwordresettoken_id=LAST_INSERT_ID(passwordresettoken_id), token=?;`,
+        [emailToken, results[0].user_id, emailToken],
+        (err: MysqlError, results) => {
+          if (err) return console.log(err);
+
+          (async () => {
+            let transporter = nodemailer.createTransport({
+              service: "gmail",
+              host: "smtp.gmail.com",
+              auth: {
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_PASSWORD,
+              },
+            });
+
+            transporter.use(
+              "compile",
+              hbs({
+                viewEngine: {
+                  engine: "express-handlebars" as any,
+                  defaultLayout: false,
+                } as any,
+                viewPath: path.resolve(__dirname, "../invoice/views"),
+              })
+            );
+
+            await transporter.sendMail({
+              from: `\"Hellsio - Customer Service\" <${process.env.GMAIL_USER}>`,
+              to: to,
+              subject: "Hellsio - Password Reset",
+              template: "password_reset",
+              context: {
+                restetEmailURL: resetPasswordURL,
+              },
+            } as any & Mail.Options);
+          })();
+        }
+      );
+    }
+  );
+};
