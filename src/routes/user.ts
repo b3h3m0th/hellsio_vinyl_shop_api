@@ -268,16 +268,30 @@ router.get(
 );
 
 router.post("/forgot-password", (req: Request, res: Response) => {
-  db.query(
-    `SELECT email FROM user WHERE username = ?`,
-    [req.body.email],
-    (err: MysqlError, results) => {
-      if (err) res.sendStatus(501);
+  if (!req.body.email.includes("@")) {
+    db.query(
+      `SELECT email FROM user WHERE username = ?;`,
+      [req.body.email],
+      (err: MysqlError, results) => {
+        if (err) res.sendStatus(501);
+        if (!results || results.length === 0) return res.sendStatus(208);
 
-      sendPasswordResetEmail(req.body.email);
-      return res.sendStatus(200);
-    }
-  );
+        sendPasswordResetEmail(results[0].email);
+        return res.sendStatus(200);
+      }
+    );
+  } else {
+    db.query(
+      `SELECT * from user WHERE email = ?;`,
+      [req.body.email],
+      (err: MysqlError, results) => {
+        if (err) res.sendStatus(501);
+        if (!results || results.length === 0) return res.sendStatus(208);
+        sendPasswordResetEmail(req.body.email);
+        return res.sendStatus(200);
+      }
+    );
+  }
 });
 
 router.post("/redefine-password", (req: Request & any, res: Response) => {
