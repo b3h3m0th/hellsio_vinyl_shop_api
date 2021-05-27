@@ -61,8 +61,8 @@ export const sendVerificationEmail: (to: string) => void = (to) => {
 };
 
 export const sendPasswordResetEmail = (to: string) => {
-  const emailToken = uuidv4();
-  const resetPasswordURL = `${process.env.BACKEND_BASE_URL}/user/reset-password/${emailToken}`;
+  const resetToken = uuidv4();
+  const resetPasswordURL = `${process.env.FRONTEND_BASE_URL}/de/define-new-password/${resetToken}`;
 
   db.query(
     `SELECT user_id FROM user WHERE user.email = ?;`,
@@ -72,7 +72,7 @@ export const sendPasswordResetEmail = (to: string) => {
 
       db.query(
         `INSERT INTO passwordresettoken (passwordresettoken_id, token, User_user_id) VALUES (NULL, ?, ?) ON DUPLICATE KEY UPDATE passwordresettoken_id=LAST_INSERT_ID(passwordresettoken_id), token=?;`,
-        [emailToken, results[0].user_id, emailToken],
+        [resetToken, results[0].user_id, resetToken],
         (err: MysqlError, results) => {
           if (err) return console.log(err);
 
@@ -103,7 +103,7 @@ export const sendPasswordResetEmail = (to: string) => {
               subject: "Hellsio - Password Reset",
               template: "password_reset",
               context: {
-                restetEmailURL: resetPasswordURL,
+                resetPasswordURL: resetPasswordURL,
               },
             } as any & Mail.Options);
           })();

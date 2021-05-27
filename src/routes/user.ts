@@ -14,7 +14,10 @@ import {
   completeCheckout,
   completeCreatePaymentIntent,
 } from "../stripe/payment";
-import { sendVerificationEmail } from "../authorization/email";
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from "../authorization/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2020-08-27",
@@ -264,27 +267,17 @@ router.get(
   }
 );
 
-router.get(
-  "/forgot-password",
-  (req: Request & { user: any }, res: Response) => {
-    if (!req.user.email.includes("@")) {
-      db.query(
-        `SELECT email FROM user WHERE username = ?`,
-        [req.user.email],
-        (err: MysqlError, results) => {
-          if (err) res.sendStatus(501);
+router.post("/forgot-password", (req: Request, res: Response) => {
+  db.query(
+    `SELECT email FROM user WHERE username = ?`,
+    [req.body.email],
+    (err: MysqlError, results) => {
+      if (err) res.sendStatus(501);
 
-          req.user.email = results[0].email;
-
-          sendVerificationEmail(req.user.email);
-          return res.sendStatus(200);
-        }
-      );
-    } else {
-      sendVerificationEmail(req.user.email);
+      sendPasswordResetEmail(req.body.email);
       return res.sendStatus(200);
     }
-  }
-);
+  );
+});
 
 export default router;
