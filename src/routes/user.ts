@@ -274,7 +274,7 @@ router.post("/forgot-password", (req: Request, res: Response) => {
       [req.body.email],
       (err: MysqlError, results) => {
         if (err) res.sendStatus(501);
-        if (!results || results.length === 0) return res.sendStatus(208);
+        if (!results || results.length === 0) return res.sendStatus(209);
 
         sendPasswordResetEmail(results[0].email);
         return res.sendStatus(200);
@@ -286,7 +286,8 @@ router.post("/forgot-password", (req: Request, res: Response) => {
       [req.body.email],
       (err: MysqlError, results) => {
         if (err) res.sendStatus(501);
-        if (!results || results.length === 0) return res.sendStatus(208);
+        if (!results || results.length === 0) return res.sendStatus(209);
+
         sendPasswordResetEmail(req.body.email);
         return res.sendStatus(200);
       }
