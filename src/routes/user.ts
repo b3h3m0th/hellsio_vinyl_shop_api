@@ -31,6 +31,11 @@ router.post("/register", async (req: Request, res: Response) => {
   if (req.body.username.includes("@"))
     return res.status(406).json({ error: "Your username mustn't include '@'" });
 
+  if (req.body.password.length < 8)
+    return res
+      .status(406)
+      .json({ error: "Your password must at least contain 8 characters" });
+
   const hashedPassword: string = bcrypt.hashSync(req.body.password, 10);
 
   db.query(
@@ -296,12 +301,20 @@ router.post("/forgot-password", (req: Request, res: Response) => {
 });
 
 router.post("/redefine-password", (req: Request & any, res: Response) => {
+  if (req.body.newPassword.length < 8)
+    return res
+      .status(406)
+      .json({ error: "Your new password must at least contain 8 characters" });
+
   db.query(
     `SELECT user.user_id, user.email, passwordresettoken.passwordresettoken_id FROM passwordresettoken JOIN user ON user.user_id=passwordresettoken.User_user_id WHERE passwordresettoken.token = ?;`,
     [req.body.token],
     (err: MysqlError, results) => {
-      if (err) res.sendStatus(501);
-      if (!results || results.length === 0) return res.sendStatus(208);
+      if (err) return res.sendStatus(501);
+      if (!results || results.length === 0)
+        return res
+          .status(406)
+          .json({ error: "You are not allowed to set a new password" });
 
       req.user_id = results[0].user_id;
       req.passwordresettoken_id = results[0].passwordresettoken_id;
@@ -312,13 +325,13 @@ router.post("/redefine-password", (req: Request & any, res: Response) => {
         `UPDATE user SET password=? WHERE user.user_id=?;`,
         [hashedPassword, req.user_id],
         (err: MysqlError, results) => {
-          if (err) res.sendStatus(501);
+          if (err) return res.sendStatus(501);
 
           db.query(
             `DELETE FROM passwordresettoken WHERE passwordresettoken.passwordresettoken_id=?`,
             [req.passwordresettoken_id],
             (err: MysqlError, results) => {
-              if (err) res.sendStatus(501);
+              if (err) return res.sendStatus(501);
 
               return res.sendStatus(201);
             }
